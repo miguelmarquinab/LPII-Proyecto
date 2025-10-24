@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+/*
 @Service                         // <-- FALTABA
 @RequiredArgsConstructor         // <-- FALTABA (inyecta el final repo)
 @Transactional                   // (opcional pero recomendado a nivel de servicio)
@@ -61,3 +61,4 @@ public class ModeloServiceImpl implements ModeloService {
         repo.deleteById(id);
     }
 }
+*/

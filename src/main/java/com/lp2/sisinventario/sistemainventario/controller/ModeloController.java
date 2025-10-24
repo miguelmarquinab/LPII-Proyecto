@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/modelos")
 @RequiredArgsConstructor
 public class ModeloController {
-
+/*
     //@Autowired
     private final ModeloService service;
 
@@ -83,4 +83,5 @@ public class ModeloController {
         ra.addFlashAttribute("success", "Modelo eliminado");
         return "redirect:/modelos";
     }
+*/
 }
