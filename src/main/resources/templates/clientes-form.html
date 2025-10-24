@@ -13,53 +13,52 @@
                 <h1 class="card-title h4 mb-0" th:text="${titulo}"></h1>
             </div>
             <div class="card-body">
-                <form id="formCliente" method="post" th:action="@{/cliente/registrar}" th:object="${cliente}">
-                    <input type="hidden" name="clienteId" th:field="*{id}" />
+                <form id="formCliente" method="post" th:action="@{/cliente/guardar}" th:object="${cliente}">
+                    <input type="hidden" name="id" th:field="*{id}" />
 
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="codigo" class="form-label">Código</label>
-                            <input type="text" class="form-control" id="codigo" name="codigo" required value="<%= cliente.getCodigo() %>">
+                            <input type="text" class="form-control" id="codigo" name="codigo" required th:field="*{codigo}">
                         </div>
                         <div class="col-md-6">
                             <label for="razonSocial" class="form-label">Razón Social</label>
-                            <input type="text" class="form-control" id="razonSocial" name="razonSocial" required value="<%= cliente.getRazonSocial() %>">
+                            <input type="text" class="form-control" id="razonSocial" name="razonSocial" required th:field="*{razonSocial}">
                         </div>
                         <div class="col-md-6">
                             <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
-                            <select class="form-select" id="tipoDocumento" name="tipoDocumento" required>
-								<option value="" disabled <%= !existeCliente ? "selected" : "" %>>Seleccione...</option>
-                                <option value="DNI" <%= existeCliente && "DNI".equals(cliente.getTipoDocumento()) ? "selected" : "" %>>DNI</option>
-                                <option value="RUC" <%= existeCliente && "RUC".equals(cliente.getTipoDocumento()) ? "selected" : "" %>>RUC</option>
+                            <select class="form-select" id="tipoDocumento" name="tipoDocumento" required th:field="*{tipoDocumento}">
+                                <option th:value="DNI">DNI</option>
+                                <option th:value="RUC">RUC</option>
                         
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label for="nroDocumento" class="form-label">Número de Documento</label>
-                            <input type="text" class="form-control" id="nroDocumento" name="nroDocumento" required value="<%= cliente.getNumeroDocumento() %>">
+                            <input type="text" class="form-control" id="nroDocumento" name="numeroDocumento" required th:field="*{numeroDocumento}">
                         </div>
                         <div class="col-12">
                             <label for="direccion" class="form-label">Dirección</label>
-                            <input type="text" class="form-control" id="direccion" name="direccion" value="<%= cliente.getDireccion() %>">
+                            <input type="text" class="form-control" id="direccion" name="direccion" th:field="*{direccion}">
                         </div>
                         <div class="col-md-6">
                             <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control" id="telefono" name="telefono" value="<%= cliente.getTelefono() %>">
+                            <input type="tel" class="form-control" id="telefono" name="telefono" th:field="*{telefono}">
                         </div>
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="<%= cliente.getEmail() %>">
+                            <input type="email" class="form-control" id="email" name="email" th:field="*{email}">
                         </div>
                         <div class="col-12">
                             <label for="contacto" class="form-label">Contacto</label>
-                            <input type="text" class="form-control" id="contacto" name="contacto" value="<%= cliente.getContacto() %>">
+                            <input type="text" class="form-control" id="contacto" name="contacto" th:field="*{contacto}">
                         </div>
                         
                         <div class="col-md-6">
                             <label for="activo" class="form-label">Estado</label>
-                            <select class="form-select" id="activo" name="activo" required>
-                                <option value="true" <%= existeCliente && cliente.getActivo() ? "selected" : "" %>>Activo</option>
-                                <option value="false" <%= existeCliente && !cliente.getActivo() ? "selected" : "" %>>Inactivo</option>
+                            <select class="form-select" id="activo" name="activo" required th:field="*{activo}">
+                                <option th:value="true">Activo</option>
+                                <option th:value="false">Inactivo</option>
                             </select>
                         </div>
                         

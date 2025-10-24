@@ -11,7 +11,7 @@
 	<div class="container">
 		<h1>Lista de Clientes</h1>
 
-		<a href="cliente?opcion=editar" class="btn btn-sm btn-success"><i class="bi bi-person-plus"></i> Agregar</a>
+		<a href="/cliente/nuevo" class="btn btn-sm btn-success"><i class="bi bi-person-plus"></i> Agregar</a>
 		<table class="table table-striped table-hover table-sm" >
 			<thead>
 				<tr>
@@ -37,14 +37,21 @@
 						<td th:text="${c.telefono}"></td>
 						<td th:text="${c.email}"></td>
 						<td th:text="${c.contacto}"></td>
-						<td th:text="${c.activo}">
 						<td th:if="${c.activo}"><span class="badge text-bg-success">Activo</span></td>
 						<td th:unless="${c.activo}"><span class="badge text-bg-danger">Inactivo</span></td>
 						<td>
-							<div class="btn-group">
-								<a class="btn btn-sm btn-outline-primary" th:href="@{/cliente(opcion='editar', id=${c.id})}" title="Editar"><i class="bi bi-pencil-fill"></i></a>
-								<a class="btn btn-sm btn-outline-danger" href="javascript:eliminar(<%=c.getId()%>)" title="Eliminar"><i class="bi bi-x-circle"></i></a>
-							</div>
+							
+								<a class="btn btn-sm btn-outline-primary" th:href="@{/cliente/editar/{id}(id=${c.id})}" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+								
+								<form th:action="@{'/cliente/eliminar/' + ${c.id}}" method="post" 
+						              th:id="'formEliminar' + ${c.id}">
+						            <button type="button" class="btn btn-sm btn-outline-danger"
+						                    th:onclick="'confirmarEliminacion(' + ${c.id} + ')'"
+						                    title="Eliminar">
+						                <i class="bi bi-x-circle"></i>
+						            </button>
+						        </form>
+
 						</td>
 					</tr>
 
@@ -56,16 +63,40 @@
 	<form id="formEliminar" action="cliente?opcion=eliminar" method="post">
 		<input type="hidden" name="id" />
 	</form>
+	
+	<div class="modal fade" id="modalConfirmar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        ¿Seguro que deseas eliminar este cliente?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 	<script type="text/javascript">
-		const eliminar = (id) => {
-			const respuesta = confirm('¿Desea eliminar el cliente?');
-			if (respuesta) {
-				document.querySelector('#formEliminar input[name=id]').value = id;
-				document.getElementById('formEliminar').submit();
-			}
-		};
+	let idAEliminar = null;
+	
+	function confirmarEliminacion(id) {
+		idAEliminar = id;
+		const modal = new bootstrap.Modal(document.getElementById('modalConfirmar'));
+		modal.show();
+	}
+	
+	document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+		  if (idAEliminar !== null) {
+			  document.getElementById("formEliminar" + idAEliminar).submit();
+		  }
+		});
 	</script>
 </body>
 </html>

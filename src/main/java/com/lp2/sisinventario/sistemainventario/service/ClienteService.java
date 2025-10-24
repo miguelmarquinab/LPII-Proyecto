@@ -2,21 +2,32 @@ package com.lp2.sisinventario.sistemainventario.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.lp2.sisinventario.sistemainventario.model.Cliente;
+import com.lp2.sisinventario.sistemainventario.repository.ClienteRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 @Service
 public class ClienteService {
         
-    @PersistenceContext
-    EntityManager entityManager;
+    @Autowired
+    ClienteRepository clienteRepository;
     
     public List<Cliente> getClientes(){
-    	String query = "FROM Cliente";
-    	return entityManager.createQuery(query).getResultList();
+    	return clienteRepository.findAll();
+    }
+    
+    public Cliente getClienteById(Integer id) {
+    	return clienteRepository.findById(id).orElse(null);
+    }
+    
+    public void guardar(Cliente cliente) {
+    	clienteRepository.save(cliente);
+    }
+    
+    public void deleteCliente(Integer id) {
+    	clienteRepository.deleteById(id);
     }
 }
