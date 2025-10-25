@@ -1,13 +1,9 @@
 package com.lp2.sisinventario.sistemainventario.controller;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import com.lp2.sisinventario.sistemainventario.dto.ModeloRequest;
 import com.lp2.sisinventario.sistemainventario.service.ModeloService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,23 +15,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class ModeloController {
 
-    //@Autowired
     private final ModeloService service;
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public String listar(Model model) {
         model.addAttribute("modelos", service.listar());
-        return "modelo/list"; // templates/modelo/list.html
+        return "modelo/list";
     }
 
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("modelo", new ModeloRequest());
         model.addAttribute("titulo", "Nuevo Modelo");
-        return "modelo/form"; // templates/modelo/form.html
+        return "modelo/form";
     }
 
-    @PostMapping
+    @PostMapping({"", "/"}) // CREAR
     public String crear(@Valid @ModelAttribute("modelo") ModeloRequest req,
                         BindingResult br,
                         RedirectAttributes ra,
@@ -61,7 +56,7 @@ public class ModeloController {
         return "modelo/form";
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}") // ACTUALIZAR
     public String actualizar(@PathVariable Integer id,
                              @Valid @ModelAttribute("modelo") ModeloRequest req,
                              BindingResult br,
@@ -77,7 +72,7 @@ public class ModeloController {
         return "redirect:/modelos";
     }
 
-    @PostMapping("/{id}/eliminar")
+    @PostMapping("/{id}/eliminar") // ELIMINAR
     public String eliminar(@PathVariable Integer id, RedirectAttributes ra) {
         service.eliminar(id);
         ra.addFlashAttribute("success", "Modelo eliminado");

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="utf-8"/>
     <title>Modelos</title>
@@ -16,12 +16,8 @@
 
     <table class="table table-striped">
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Descripción</th>
-            <th>Código</th>
-            <th class="text-end">Acciones</th>
-        </tr></thead>
+        <tr><th>ID</th><th>Descripción</th><th>Código</th><th class="text-end">Acciones</th></tr>
+        </thead>
         <tbody>
         <tr th:each="m : ${modelos}">
             <td th:text="${m.id}">1</td>
@@ -30,6 +26,8 @@
             <td class="text-end">
                 <a class="btn btn-sm btn-secondary" th:href="@{|/modelos/${m.id}/editar|}">Editar</a>
                 <form th:action="@{|/modelos/${m.id}/eliminar|}" method="post" class="d-inline">
+                    <input type="hidden" th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar?')">Eliminar</button>
                 </form>
             </td>
