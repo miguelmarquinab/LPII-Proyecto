@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de contratos</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+	    <div class="container py-4">
+	    <div class="container" style="display:flex; justify-content:space-between; align-items: center;">
+	    <h1 class="mb-4">Gestión de Contratos</h1>
+	    <a href="contrato?opcion=editar" class="btn btn-sm btn-success"><i class="bi bi-person-plus"></i> Agregar</a>
+	    </div>
+        <!-- Filtros -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form class="row g-3" th:action="@{/contrato}" method="get">
+                    <div class="col-md-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" name="idCliente">
+                            <option value="0" selected>Todos los clientes</option>
+                            <option th:each="c:${clientes}" th:value="${c.id}" th:text="${c.razonSocial}" th:selected="${param.idCliente != null && param.idCliente[0] == c.id.toString()}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" name="estado">
+                            <option selected value="">Todos los estados</option>
+                            <option th:selected="${param.estado != null && param.estado[0] == 'ACTIVO'}">ACTIVO</option>
+                            <option th:selected="${param.estado != null && param.estado[0] == 'VENCIDO'}">ACTIVO</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha Desde</label>
+                        <input type="date" class="form-control" name="fechaIni" th:value="${param.fechaIni != null ? param.fechaIni[0] : ''}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha Hasta</label>
+                        <input type="date" class="form-control" name="fechaFin" th:value="${param.fechaFin != null ? param.fechaFin[0] : ''}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a th:href="@{/contrato}" class="btn btn-outline-secondary ms-2">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <table class="table table-striped table-hover table-sm" >
+			<thead>
+				<tr>
+					<th>N° Contrato</th>
+					<th>Cliente</th>
+					<th>Fecha inicio</th>
+					<th>Fecha fin</th>
+					<th>Valor mensual</th>
+					<th>Estado</th>
+					<th>Nro de radios</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+
+					<tr th:each="c: ${contratos}">
+						<td th:text="${c.numero}"></td>
+						<td th:text="${c.razonSocial}"></td>
+						<td th:text="${c.fechaInicio}"></td>
+						<td th:text="${c.fechaFin}"></td>
+						<td th:text="${c.valorMensual}"></td>
+						<td th:text="${c.estado}"></td>
+						<td th:text="${c.nroRadios}"></td>
+						
+						<td>
+							<div class="btn-group">
+								<a class="btn btn-sm btn-outline-primary" th:href="@{/contrato/editar/{id}(id=${c.id})}" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+								<a class="btn btn-sm btn-outline-danger" href="javascript:eliminar(<%=c.getId()%>)" title="Eliminar"><i class="bi bi-x-circle"></i></a>
+							</div>
+						</td>
+					</tr>
+			</tbody>
+		</table>
+		    </div>
+	<form id="formEliminar" action="cliente?opcion=eliminar" method="post">
+		<input type="hidden" name="id" />
+	</form>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		const eliminar = (id) => {
+			const respuesta = confirm('¿Desea eliminar el cliente?');
+			if (respuesta) {
+				document.querySelector('#formEliminar input[name=id]').value = id;
+				document.getElementById('formEliminar').submit();
+			}
+		};
+	</script>
+</body>
+</html>
