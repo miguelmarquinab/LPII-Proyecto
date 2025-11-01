@@ -22,21 +22,21 @@ public class ClienteController {
 	@GetMapping
 	public String getClientes(Model model){
 		model.addAttribute("clientes", clienteService.getClientes());
-		return "clientes.html";
+		return "clientes/clientes.html";
 	}
 	
 	@GetMapping("/nuevo")
 	public String nuevoCliente(Model model){
 		model.addAttribute("cliente", new Cliente());
 		model.addAttribute("titulo", "Nuevo cliente");
-		return "clientes-form.html";
+		return "clientes/clientes-form.html";
 	}
 	
 	@GetMapping("/editar/{id}")
 	public String editarCliente(@PathVariable Integer id, Model model){
 		model.addAttribute("cliente", clienteService.getClienteById(id));
 		model.addAttribute("titulo", "Editar cliente");
-		return "clientes-form.html";
+		return "clientes/clientes-form.html";
 	}
 	
 	@PostMapping("/guardar")
