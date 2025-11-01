@@ -1,6 +1,7 @@
 package com.lp2.sisinventario.sistemainventario.controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
 import com.lp2.sisinventario.sistemainventario.model.Contrato;
 import com.lp2.sisinventario.sistemainventario.service.ClienteService;
 import com.lp2.sisinventario.sistemainventario.service.ContratoService;
+import com.lp2.sisinventario.sistemainventario.service.impl.ModeloServiceImpl;
 
 @Controller
 @RequestMapping("/contrato")
@@ -27,6 +29,9 @@ public class ContratoController {
 	
 	@Autowired
 	private ClienteService clienteService;
+	
+	@Autowired
+	private ModeloServiceImpl modeloServiceImpl;
 	
 	@GetMapping
 	public String getContratos(@RequestParam(required = false) String estado,
@@ -56,14 +61,25 @@ public class ContratoController {
 	public String nuevoContrato(Model model) {
 		model.addAttribute("contrato", new Contrato());
 		model.addAttribute("titulo", "Nuevo contrato");
+		model.addAttribute("clientes", clienteService.getClientes());
+		model.addAttribute("modelos", modeloServiceImpl.listar());
+		model.addAttribute("listaDetalleContrato", new ArrayList<>());
 		return "contrato/contrato-form.html";
 	}
 	
-	/*TODO: Pendiente*/
 	@GetMapping("/editar/{id}")
 	public String editarContrato(@PathVariable Integer id,Model model) {
-		model.addAttribute("contrato", contratoService.getContratoById(id));
+		
+		Contrato contratoSeleccionado = contratoService.getContratoById(id);
+		
+		model.addAttribute("contrato", contratoSeleccionado);
+		model.addAttribute("clienteIdSeleccionado", contratoSeleccionado.getCliente().getId());
+			
 		model.addAttribute("clientes", clienteService.getClientes());
+		model.addAttribute("modelos", modeloServiceImpl.listar());
+		System.out.println(contratoSeleccionado.getDetalles());
+		model.addAttribute("listaDetalleContrato", contratoSeleccionado.getDetalles());
+			
 		model.addAttribute("titulo", "Editar contrato");
 		return "contrato/contrato-form.html";
 	}

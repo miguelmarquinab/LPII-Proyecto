@@ -33,7 +33,7 @@ public class ContratoService {
 	}
 	
 	public Contrato getContratoById(Integer id) {
-		return contratoRepository.findById(id).orElse(null);
+		return contratoRepository.findByIdWithRelation(id).orElse(null);
 	}
 	
 }

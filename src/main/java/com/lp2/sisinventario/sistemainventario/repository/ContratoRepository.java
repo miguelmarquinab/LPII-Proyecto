@@ -7,6 +7,7 @@ import com.lp2.sisinventario.sistemainventario.model.Contrato;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,5 +41,8 @@ public interface ContratoRepository extends JpaRepository<Contrato, Integer>{
 		    @Param("fechaInicio") LocalDate fechaInicio,
 		    @Param("fechaFin") LocalDate fechaFin
 		);
-	
+	 
+	 @Query("SELECT c FROM Contrato c LEFT JOIN FETCH c.cliente LEFT JOIN FETCH c.detalles WHERE c.id = :id")
+	 Optional<Contrato> findByIdWithRelation(@Param("id") Integer id);
+	 
 }
