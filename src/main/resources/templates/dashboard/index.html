@@ -1,34 +1,59 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Dashboard | Sistema de Inventario</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <style>
-        body { min-height: 100vh; }
-        .sidebar { width: 240px; background:#0d6efd; color:#fff; }
-        .sidebar a { color:#fff; text-decoration:none; display:block; padding:.75rem 1rem; }
-        .sidebar a:hover { background: rgba(255,255,255,.15); }
-    </style>
+<meta charset="UTF-8">
+<title>Inicio | Sistema de Inventario	</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-<div class="d-flex">
-    <aside class="sidebar p-3">
-        <h5 class="mb-3">Menú</h5>
-        <!-- más tarde mostraremos ítems según el rol -->
-        <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/modelos}">Modelos</a>
-        <form th:action="@{/logout}" method="post" class="mt-3">
-            <input type="hidden" th:if="${_csrf!=null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <button class="btn btn-sm btn-light">Salir</button>
-        </form>
-    </aside>
-
-    <main class="flex-grow-1 p-4">
-        <h3>Bienvenido</h3>
-        <p>Has iniciado sesión correctamente.</p>
-    </main>
+	<div th:replace="shared/navbar :: navbar"></div>
+		
+	    <section class="text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Sistema de Inventario de radios</h1>
+            <p class="mb-5">Servicio de Radio Troncalizado Digital TETRA para Seguridad Pública y Operaciones Críticas que no colapsa en emergencias.</p>
+        </div>
+    </section>
+    
+<section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Nuestros Servicios</h2>
+                <p class="text-muted">Soluciones en comunicación para cada necesidad</p>
+            </div>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+  <div class="col">
+    <div class="card">
+      <img src="https://dolphin.pe/wp-content/uploads/2020/12/servicios_pioneros_tetra1-300x200.jpg" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Pioneros en Tecnología Tetra</h5>
+        <p class="card-text">Somos la Primera Red de Radio Troncalizado Digital TETRA en el Perú. Miles de usuarios en Seguridad Pública y Misión Crítica confían sus comunicaciones en la red Tetra más estable.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <img src="https://dolphin.pe/wp-content/uploads/2020/12/servicios_pioneros_tetra2-300x200.jpg" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Soluciones de Misión Crítica</h5>
+        <p class="card-text">Dolphin por ser un servicio de comunicaciones de misión crítica ofrece cobertura sin igual, resistencia, velocidad y seguridad en toda circunstancia. Nuestros sistemas Tetra de comunicación no colapsan.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <img src="https://dolphin.pe/wp-content/uploads/2014/03/desastres.jpg" class="card-img-top" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">Comunicaciones Seguras</h5>
+        <p class="card-text">La Red Tetra de Dolphin ha demostrado que funciona, incluso en situaciones de emergencia cuando otras redes fallan. Además, ofrecemos a nuestros clientes soporte 24/7/365.</p>
+      </div>
+    </div>
+  </div>
 </div>
+        </div>
+    </section>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 </body>
 </html>
