@@ -1,0 +1,10 @@
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (1, 1, 1, 2, 250.00, 500.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (2, 1, 2, 2, 250.00, 500.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (3, 8, 1, 2, 500.00, 1000.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (4, 7, 1, 1, 100.00, 100.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (5, 9, 1, 15, 445.00, 6675.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (6, 9, 2, 25, 660.00, 16500.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (7, 10, 3, 5, 120.00, 600.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (8, 10, 1, 12, 150.00, 1800.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (9, 7, 2, 2, 120.00, 240.00, 0, 1);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.detalleContratos (dec_id, con_id, mod_id, dec_cantidad, dec_precioUnitario, dec_subtotal, dec_filaEliminada, usa_id) VALUES (10, 11, 1, 2, 0.00, 0.00, 0, 1);

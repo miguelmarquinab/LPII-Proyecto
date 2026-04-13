@@ -1,0 +1,4 @@
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.modeloRadio (mod_id, mod_descripcion, mod_codigo, mod_filaFecha, mod_filaOriginal, mod_filaEliminada, usa_id) VALUES (1, 'TETRA 2', 'M00001', '2025-08-12 22:57:03', 1, 0, 0);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.modeloRadio (mod_id, mod_descripcion, mod_codigo, mod_filaFecha, mod_filaOriginal, mod_filaEliminada, usa_id) VALUES (2, 'TETRA MXP600', 'M00002', '2025-08-12 22:09:29', 1, 0, 0);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.modeloRadio (mod_id, mod_descripcion, mod_codigo, mod_filaFecha, mod_filaOriginal, mod_filaEliminada, usa_id) VALUES (3, 'TETRA MTP3100', 'M00003', '2025-08-14 16:10:54', 1, 0, null);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.modeloRadio (mod_id, mod_descripcion, mod_codigo, mod_filaFecha, mod_filaOriginal, mod_filaEliminada, usa_id) VALUES (8, 'TETRA MTP3900', 'M00002', '2025-08-28 23:38:51', 1, 0, null);

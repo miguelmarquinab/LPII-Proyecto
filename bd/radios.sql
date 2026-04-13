@@ -1,0 +1,2 @@
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.radios (rad_id, mod_id, esr_id, serie, fecha_ingreso, rad_activo, rad_filafecha, rad_filaoriginal, rad_filaeliminado, usa_id) VALUES (3, 3, 4, '1123456', '2025-08-24 00:00:00', 1, null, null, null, null);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.radios (rad_id, mod_id, esr_id, serie, fecha_ingreso, rad_activo, rad_filafecha, rad_filaoriginal, rad_filaeliminado, usa_id) VALUES (4, 1, 3, '6556-678', '2025-08-29 00:00:00', 0, null, null, null, null);

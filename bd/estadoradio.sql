@@ -1,0 +1,4 @@
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.estadoradio (esr_id, esr_descripcion, esr_sigla, esr_activo, esr_filafecha, esr_filaoriginal, esr_filaeliminada, usa_id) VALUES (1, 'Disponible', null, null, '2025-08-18 10:26:42', null, 0, null);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.estadoradio (esr_id, esr_descripcion, esr_sigla, esr_activo, esr_filafecha, esr_filaoriginal, esr_filaeliminada, usa_id) VALUES (2, 'Reparacion', null, 1, '2025-08-18 10:29:57', null, 0, null);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.estadoradio (esr_id, esr_descripcion, esr_sigla, esr_activo, esr_filafecha, esr_filaoriginal, esr_filaeliminada, usa_id) VALUES (3, 'Baja', null, 1, '2025-08-18 10:30:38', null, 0, null);
+INSERT INTO centrowebp1_bd_lp1_proyecto_inventario.estadoradio (esr_id, esr_descripcion, esr_sigla, esr_activo, esr_filafecha, esr_filaoriginal, esr_filaeliminada, usa_id) VALUES (4, 'Alta', null, 1, '2025-08-18 10:30:41', null, 0, null);
