@@ -17,7 +17,14 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/actuator/**").permitAll()
+                        .requestMatchers(
+                                "/login",
+                                "/api/auth/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/actuator/**"
+                        ).permitAll()
                         .requestMatchers("/", "/dashboard", "/modelos/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -27,7 +34,8 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"));
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
         return http.build();
     }
 

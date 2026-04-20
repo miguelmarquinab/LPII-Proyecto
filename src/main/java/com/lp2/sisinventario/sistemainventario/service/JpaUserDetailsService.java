@@ -19,7 +19,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var u = usuarios.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsernameNotFoundException("UsuarioApi no encontrado"));
 
         boolean enabled = u.getEnabled() == null ? true : u.getEnabled();
         var rol = (u.getRol()!=null ? u.getRol().getNombre() : "ROLE_USER");
