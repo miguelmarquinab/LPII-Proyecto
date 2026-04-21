@@ -39,11 +39,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-    //@Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
     @Bean
-    PasswordEncoder passwordEncoder() {
-        // SOLO PARA DESARROLLO: no en producción
-        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+    public PasswordEncoder passwordEncoder() {
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
     }
 
     @Bean
