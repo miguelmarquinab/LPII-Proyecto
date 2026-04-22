@@ -27,3 +27,13 @@ POST /api/auth/login
     "role": "ROLE_ADMIN"
   }
 }
+
+
+GET    /api/radios?texto=
+GET    /api/radios/{id}
+POST   /api/radios
+PUT    /api/radios/{id}
+DELETE /api/radios/{id}
+
+GET    /api/radios/catalogos/modelos
+GET    /api/radios/catalogos/estados
