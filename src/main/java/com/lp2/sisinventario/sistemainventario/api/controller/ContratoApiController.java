@@ -1,6 +1,7 @@
 package com.lp2.sisinventario.sistemainventario.api.controller;
 
 import com.lp2.sisinventario.sistemainventario.model.Contrato;
+import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
 import com.lp2.sisinventario.sistemainventario.repository.ContratoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,14 @@ public class ContratoApiController {
     }
     
     @GetMapping
-    public ResponseEntity<List<Contrato>> listarContratos() {
-        List<Contrato> contratos = contratoRepository.findAll();
-        return ResponseEntity.ok(contratos);
+    public ResponseEntity<List<ContratoResumenDTO>> listarContratos() {
+        List<ContratoResumenDTO> lista = contratoRepository.buscarTodosParaResumen();
+        
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
@@ -35,7 +41,14 @@ public class ContratoApiController {
     @PostMapping
     public ResponseEntity<Contrato> crearContrato(@RequestBody Contrato contrato) {
         Contrato nuevoContrato = contratoRepository.save(contrato);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoContrato);
+        
+        java.net.URI location = org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(nuevoContrato.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(nuevoContrato);
     }
 
     @PutMapping("/{id}")

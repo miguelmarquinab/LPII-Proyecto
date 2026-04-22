@@ -4,14 +4,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 import com.lp2.sisinventario.sistemainventario.dto.ContratoFiltroDTO;
 import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
@@ -22,16 +19,12 @@ import com.lp2.sisinventario.sistemainventario.service.impl.ModeloServiceImpl;
 
 @Controller
 @RequestMapping("/contrato")
+@RequiredArgsConstructor
 public class ContratoController {
 	
-	@Autowired
-	private ContratoService contratoService;
-	
-	@Autowired
-	private ClienteService clienteService;
-	
-	@Autowired
-	private ModeloServiceImpl modeloServiceImpl;
+	private final ContratoService contratoService;
+	private final ClienteService clienteService;
+	private final ModeloServiceImpl modeloServiceImpl;
 	
 	@GetMapping
 	public String getContratos(@RequestParam(required = false) String estado,
@@ -40,17 +33,13 @@ public class ContratoController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin,
 	        Model model) {
 		
-
-		
 		ContratoFiltroDTO filtros = new ContratoFiltroDTO();
 		filtros.setClienteId(idCliente);
 		filtros.setEstado(estado);
 		filtros.setFechaFin(fechaFin);
-		filtros.setFechaFin(fechaIni);
-		
+		filtros.setFechaInicio(fechaIni); 
 		
 		List<ContratoResumenDTO> contratos = contratoService.obtenerResumenContratos(filtros);
-		
 		
 		model.addAttribute("contratos", contratos);
 		model.addAttribute("clientes", clienteService.getClientes());
@@ -77,7 +66,6 @@ public class ContratoController {
 			
 		model.addAttribute("clientes", clienteService.getClientes());
 		model.addAttribute("modelos", modeloServiceImpl.listar());
-		System.out.println(contratoSeleccionado.getDetalles());
 		model.addAttribute("listaDetalleContrato", contratoSeleccionado.getDetalles());
 			
 		model.addAttribute("titulo", "Editar contrato");
