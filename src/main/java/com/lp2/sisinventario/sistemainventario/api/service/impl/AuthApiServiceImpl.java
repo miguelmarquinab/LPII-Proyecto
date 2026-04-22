@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthApiServiceImpl implements AuthApiService {
 
-    private final UsuarioApiRepository usuarioRepository;
+	private final UsuarioApiRepository usuarioRepository;
     private final JwtService jwtService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public AuthApiServiceImpl(UsuarioApiRepository usuarioRepository, JwtService jwtService) {
+    public AuthApiServiceImpl(UsuarioApiRepository usuarioRepository, JwtService jwtService, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -24,7 +26,7 @@ public class AuthApiServiceImpl implements AuthApiService {
         UsuarioApi usuario = usuarioRepository.findByNombre(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("UsuarioApi no encontrado"));
 
-        if (!usuario.getClave().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), usuario.getClave())) {
             throw new RuntimeException("Credenciales incorrectas");
         }
 
