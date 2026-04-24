@@ -1,0 +1,2695 @@
+[ANALISIS DE PROYECTO: sistemainventario] 
+[ESTRUCTURA DE DIRECTORIOS] 
+Listado de rutas de carpetas para el volumen Nuevo vol
+El nero de serie del volumen es 92E3-A1A5
+
+[FILE: SistemainventarioApplication.java] 
+package com.lp2.sisinventario.sistemainventario;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SistemainventarioApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SistemainventarioApplication.class, args);
+	}
+
+}
+ 
+[END: SistemainventarioApplication.java] 
+.................................................. 
+[FILE: api\controller\AuthApiController.java] 
+package com.lp2.sisinventario.sistemainventario.api.controller;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.ApiResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthResponse;
+import com.lp2.sisinventario.sistemainventario.api.service.AuthApiService;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthApiController {
+
+    private final AuthApiService authApiService;
+
+    public AuthApiController(AuthApiService authApiService) {
+        this.authApiService = authApiService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody AuthRequest request) {
+        AuthResponse response = authApiService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok("Autenticaci贸n correcta", response));
+    }
+}
+ 
+[END: api\controller\AuthApiController.java] 
+.................................................. 
+[FILE: api\controller\ContratoApiController.java] 
+package com.lp2.sisinventario.sistemainventario.api.controller;
+
+import com.lp2.sisinventario.sistemainventario.model.Contrato;
+import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
+import com.lp2.sisinventario.sistemainventario.repository.ContratoRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/contratos")
+@CrossOrigin(origins = "*")
+public class ContratoApiController {
+
+    private final ContratoRepository contratoRepository;
+
+    public ContratoApiController(ContratoRepository contratoRepository) {
+        this.contratoRepository = contratoRepository;
+    }
+    
+    @GetMapping
+    public ResponseEntity<List<ContratoResumenDTO>> listarContratos() {
+        List<ContratoResumenDTO> lista = contratoRepository.buscarTodosParaResumen();
+        
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Contrato> obtenerContrato(@PathVariable Integer id) {
+        return contratoRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Contrato> crearContrato(@RequestBody Contrato contrato) {
+        Contrato nuevoContrato = contratoRepository.save(contrato);
+        
+        java.net.URI location = org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(nuevoContrato.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(nuevoContrato);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Contrato> actualizarContrato(@PathVariable Integer id, @RequestBody Contrato contrato) {
+        if (!contratoRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        contrato.setId(id);
+        Contrato contratoActualizado = contratoRepository.save(contrato);
+        return ResponseEntity.ok(contratoActualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarContrato(@PathVariable Integer id) {
+        if (!contratoRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        contratoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+} 
+[END: api\controller\ContratoApiController.java] 
+.................................................. 
+[FILE: api\controller\RadioApiController.java] 
+package com.lp2.sisinventario.sistemainventario.api.controller;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.ApiResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.CatalogoItemResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioResponse;
+import com.lp2.sisinventario.sistemainventario.api.service.RadioApiService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/radios")
+public class RadioApiController {
+    private final RadioApiService radioApiService;
+
+    public RadioApiController(RadioApiService radioApiService) {
+        this.radioApiService = radioApiService;
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<RadioResponse>>> listar(
+            @RequestParam(required = false, defaultValue = "") String texto) {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Listado de radios correcto", radioApiService.listar(texto))
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<RadioResponse>> obtener(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Radio obtenido correctamente", radioApiService.obtener(id))
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<Integer>> crear(@RequestBody RadioRequest request) {
+        Integer id = radioApiService.crear(request);
+        return ResponseEntity.ok(
+                ApiResponse.ok("Radio registrado correctamente", id)
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Integer>> actualizar(
+            @PathVariable Integer id,
+            @RequestBody RadioRequest request) {
+        Integer radioId = radioApiService.actualizar(id, request);
+        return ResponseEntity.ok(
+                ApiResponse.ok("Radio actualizado correctamente", radioId)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Integer id) {
+        radioApiService.eliminar(id);
+        return ResponseEntity.ok(
+                ApiResponse.ok("Radio eliminado correctamente", null)
+        );
+    }
+
+    @GetMapping("/catalogos/modelos")
+    public ResponseEntity<ApiResponse<List<CatalogoItemResponse>>> listarModelos() {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Modelos obtenidos correctamente", radioApiService.listarModelos())
+        );
+    }
+
+    @GetMapping("/catalogos/estados")
+    public ResponseEntity<ApiResponse<List<CatalogoItemResponse>>> listarEstados() {
+        return ResponseEntity.ok(
+                ApiResponse.ok("Estados obtenidos correctamente", radioApiService.listarEstados())
+        );
+    }
+}
+ 
+[END: api\controller\RadioApiController.java] 
+.................................................. 
+[FILE: api\dto\ApiResponse.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+public class ApiResponse<T> {
+
+    private boolean success;
+    private String message;
+    private T data;
+
+    public ApiResponse(boolean success, String message, T data) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+    }
+
+    public static <T> ApiResponse<T> ok(String message, T data) {
+        return new ApiResponse<>(true, message, data);
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return new ApiResponse<>(false, message, null);
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+}
+ 
+[END: api\dto\ApiResponse.java] 
+.................................................. 
+[FILE: api\dto\AuthRequest.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+public class AuthRequest {
+
+    private String username;
+    private String password;
+
+    public AuthRequest() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+ 
+[END: api\dto\AuthRequest.java] 
+.................................................. 
+[FILE: api\dto\AuthResponse.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+public class AuthResponse {
+
+    private String token;
+    private String type;
+    private String username;
+    private String role;
+
+    public AuthResponse() {
+    }
+
+    public AuthResponse(String token, String type, String username, String role) {
+        this.token = token;
+        this.type = type;
+        this.username = username;
+        this.role = role;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+}
+ 
+[END: api\dto\AuthResponse.java] 
+.................................................. 
+[FILE: api\dto\CatalogoItemResponse.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+public class CatalogoItemResponse {
+    private Integer id;
+    private String codigo;
+    private String descripcion;
+
+    public CatalogoItemResponse() {}
+
+    public CatalogoItemResponse(Integer id, String codigo, String descripcion) {
+        this.id = id;
+        this.codigo = codigo;
+        this.descripcion = descripcion;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+}
+ 
+[END: api\dto\CatalogoItemResponse.java] 
+.................................................. 
+[FILE: api\dto\RadioRequest.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+
+public class RadioRequest {
+    private Integer id;
+    private Integer modId;
+    private Integer esrId;
+    private String serie;
+    private String fechaIngreso;
+    private Integer activo;
+
+    public RadioRequest() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getModId() {
+        return modId;
+    }
+
+    public void setModId(Integer modId) {
+        this.modId = modId;
+    }
+
+    public Integer getEsrId() {
+        return esrId;
+    }
+
+    public void setEsrId(Integer esrId) {
+        this.esrId = esrId;
+    }
+
+    public String getSerie() {
+        return serie;
+    }
+
+    public void setSerie(String serie) {
+        this.serie = serie;
+    }
+
+    public String getFechaIngreso() {
+        return fechaIngreso;
+    }
+
+    public void setFechaIngreso(String fechaIngreso) {
+        this.fechaIngreso = fechaIngreso;
+    }
+
+    public Integer getActivo() {
+        return activo;
+    }
+
+    public void setActivo(Integer activo) {
+        this.activo = activo;
+    }
+}
+ 
+[END: api\dto\RadioRequest.java] 
+.................................................. 
+[FILE: api\dto\RadioResponse.java] 
+package com.lp2.sisinventario.sistemainventario.api.dto;
+
+public class RadioResponse {
+
+    private Integer id;
+    private Integer modId;
+    private Integer esrId;
+    private String modCodigo;
+    private String modelo;
+    private String estado;
+    private String serie;
+    private String fechaIngreso;
+    private Integer activo;
+
+    public RadioResponse() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getModId() {
+        return modId;
+    }
+
+    public void setModId(Integer modId) {
+        this.modId = modId;
+    }
+
+    public Integer getEsrId() {
+        return esrId;
+    }
+
+    public void setEsrId(Integer esrId) {
+        this.esrId = esrId;
+    }
+
+    public String getModCodigo() {
+        return modCodigo;
+    }
+
+    public void setModCodigo(String modCodigo) {
+        this.modCodigo = modCodigo;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getSerie() {
+        return serie;
+    }
+
+    public void setSerie(String serie) {
+        this.serie = serie;
+    }
+
+    public String getFechaIngreso() {
+        return fechaIngreso;
+    }
+
+    public void setFechaIngreso(String fechaIngreso) {
+        this.fechaIngreso = fechaIngreso;
+    }
+
+    public Integer getActivo() {
+        return activo;
+    }
+
+    public void setActivo(Integer activo) {
+        this.activo = activo;
+    }
+}
+ 
+[END: api\dto\RadioResponse.java] 
+.................................................. 
+[FILE: api\exception\GlobalApiExceptionHandler.java] 
+package com.lp2.sisinventario.sistemainventario.api.exception;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.ApiResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice(basePackages = "com.lp2.sisinventario.sistemainventario.api.controller")
+public class GlobalApiExceptionHandler {
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuntime(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("Error interno del servidor"));
+    }
+}
+ 
+[END: api\exception\GlobalApiExceptionHandler.java] 
+.................................................. 
+[FILE: api\model\RolApi.java] 
+package com.lp2.sisinventario.sistemainventario.api.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "roles")
+public class RolApi {
+    @Id
+    @Column(name = "rol_id")
+    private Integer id;
+
+    @Column(name = "rol_nombre")
+    private String rolNombre;
+
+    @Column(name = "rol_estado")
+    private String rolEstado;
+
+    @Column(name = "rol_activo")
+    private Boolean rolActivo;
+
+    public RolApi() {}
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getRolNombre() {
+        return rolNombre;
+    }
+
+    public void setRolNombre(String rolNombre) {
+        this.rolNombre = rolNombre;
+    }
+
+    public String getRolEstado() {
+        return rolEstado;
+    }
+
+    public void setRolEstado(String rolEstado) {
+        this.rolEstado = rolEstado;
+    }
+
+    public Boolean getRolActivo() {
+        return rolActivo;
+    }
+
+    public void setRolActivo(Boolean rolActivo) {
+        this.rolActivo = rolActivo;
+    }
+}
+ 
+[END: api\model\RolApi.java] 
+.................................................. 
+[FILE: api\model\UsuarioApi.java] 
+package com.lp2.sisinventario.sistemainventario.api.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
+public class UsuarioApi {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "usa_id")
+    private Integer id;
+
+    @Column(name = "nombre")
+    private String nombre;
+
+    @Column(name = "clave")
+    private String clave;
+
+    @Column(name = "usa_nombres")
+    private String nombres;
+
+    @Column(name = "usa_apellidopaterno")
+    private String apellidoPaterno;
+
+    @Column(name = "usa_apellidomaterno")
+    private String apellidoMaterno;
+
+    @Column(name = "usa_estado")
+    private String estado;
+
+    @Column(name = "usa_activo")
+    private String activo;
+
+    // 馃敟 RELACI脫N CLAVE
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol")
+    private RolApi rol;
+
+    public UsuarioApi() {}
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
+    }
+
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    public String getApellidoMaterno() {
+        return apellidoMaterno;
+    }
+
+    public void setApellidoMaterno(String apellidoMaterno) {
+        this.apellidoMaterno = apellidoMaterno;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getActivo() {
+        return activo;
+    }
+
+    public void setActivo(String activo) {
+        this.activo = activo;
+    }
+
+    public RolApi getRol() {
+        return rol;
+    }
+
+    public void setRol(RolApi rol) {
+        this.rol = rol;
+    }
+}
+ 
+[END: api\model\UsuarioApi.java] 
+.................................................. 
+[FILE: api\repository\RadioApiRepository.java] 
+package com.lp2.sisinventario.sistemainventario.api.repository;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.CatalogoItemResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioResponse;
+
+import java.util.List;
+
+public interface RadioApiRepository {
+
+    List<RadioResponse> listar(String texto);
+    RadioResponse obtener(Integer id);
+    Integer guardar(RadioRequest request);
+    void eliminar(Integer id);
+    List<CatalogoItemResponse> listarModelos();
+    List<CatalogoItemResponse> listarEstados();
+}
+ 
+[END: api\repository\RadioApiRepository.java] 
+.................................................. 
+[FILE: api\repository\UsuarioApiRepository.java] 
+package com.lp2.sisinventario.sistemainventario.api.repository;
+
+import com.lp2.sisinventario.sistemainventario.api.model.UsuarioApi;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UsuarioApiRepository extends JpaRepository<UsuarioApi, Integer> {
+     Optional<UsuarioApi> findByNombre(String nombre);
+}
+ 
+[END: api\repository\UsuarioApiRepository.java] 
+.................................................. 
+[FILE: api\repository\impl\RadioApiRepositoryImpl.java] 
+package com.lp2.sisinventario.sistemainventario.api.repository.impl;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.CatalogoItemResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioResponse;
+import com.lp2.sisinventario.sistemainventario.api.repository.RadioApiRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public class RadioApiRepositoryImpl implements RadioApiRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public RadioApiRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public List<RadioResponse> listar(String texto) {
+        return jdbcTemplate.query(
+                "CALL usp_Buscar_Radio(?)",
+                new Object[]{texto},
+                (rs, rowNum) -> {
+                    RadioResponse item = new RadioResponse();
+                    item.setId(rs.getInt("rad_id"));
+                    item.setModCodigo(rs.getString("mod_codigo"));
+                    item.setModelo(rs.getString("modelo"));
+                    item.setEstado(rs.getString("estado"));
+                    item.setSerie(rs.getString("serie"));
+                    item.setFechaIngreso(rs.getString("fecha_ingreso"));
+                    item.setActivo(rs.getObject("rad_activo") != null ? rs.getInt("rad_activo") : null);
+                    return item;
+                }
+        );
+    }
+
+    @Override
+    public RadioResponse obtener(Integer id) {
+        List<RadioResponse> lista = jdbcTemplate.query(
+                "CALL usp_radio_obtener(?)",
+                new Object[]{id},
+                (rs, rowNum) -> {
+                    RadioResponse item = new RadioResponse();
+                    item.setId(rs.getInt("radio_id"));
+                    item.setModId(rs.getInt("mod_id"));
+                    item.setEsrId(rs.getInt("esr_id"));
+                    item.setModCodigo(rs.getString("mod_codigo"));
+                    item.setModelo(rs.getString("modelo"));
+                    item.setEstado(rs.getString("estado"));
+                    item.setSerie(rs.getString("serie"));
+                    item.setFechaIngreso(rs.getString("fecha_ingreso"));
+                    item.setActivo(rs.getObject("rad_activo") != null ? rs.getInt("rad_activo") : null);
+                    return item;
+                }
+        );
+
+        if (lista.isEmpty()) {
+            throw new RuntimeException("Radio no encontrado");
+        }
+
+        return lista.get(0);
+    }
+
+    @Override
+    public Integer guardar(RadioRequest request) {
+        SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName("usp_radio_guardar");
+
+        LocalDateTime fecha = LocalDateTime.parse(
+                request.getFechaIngreso(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
+
+        Map<String, Object> inParams = new HashMap<>();
+        inParams.put("p_rad_id", request.getId());
+        inParams.put("p_mod_id", request.getModId());
+        inParams.put("p_esr_id", request.getEsrId());
+        inParams.put("p_serie", request.getSerie());
+        inParams.put("p_fecha_ingreso", Timestamp.valueOf(fecha));
+        inParams.put("p_activo", request.getActivo());
+
+        Map<String, Object> out = call.execute(inParams);
+
+        Object value = out.get("nuevo_id");
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+
+        List<?> rsList = (List<?>) out.get("#result-set-1");
+        if (rsList != null && !rsList.isEmpty()) {
+            Object first = rsList.get(0);
+            if (first instanceof Map<?, ?> row) {
+                Object nuevoId = row.get("nuevo_id");
+                if (nuevoId instanceof Number number) {
+                    return number.intValue();
+                }
+            }
+        }
+
+        throw new RuntimeException("No se pudo obtener el id generado");
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        jdbcTemplate.update("CALL usp_radio_eliminar(?)", id);
+    }
+
+    @Override
+    public List<CatalogoItemResponse> listarModelos() {
+        return jdbcTemplate.query(
+                "CALL usp_radio_modelos()",
+                (rs, rowNum) -> new CatalogoItemResponse(
+                        rs.getInt("mod_id"),
+                        rs.getString("mod_codigo"),
+                        rs.getString("mod_descripcion")
+                )
+        );
+    }
+
+    @Override
+    public List<CatalogoItemResponse> listarEstados() {
+        return jdbcTemplate.query(
+                "CALL usp_radio_estados()",
+                (rs, rowNum) -> new CatalogoItemResponse(
+                        rs.getInt("esr_id"),
+                        null,
+                        rs.getString("esr_descripcion")
+                )
+        );
+    }
+}
+ 
+[END: api\repository\impl\RadioApiRepositoryImpl.java] 
+.................................................. 
+[FILE: api\security\JwtAccessDeniedHandler.java] 
+package com.lp2.sisinventario.sistemainventario.api.security;
+
+public class JwtAccessDeniedHandler {
+}
+ 
+[END: api\security\JwtAccessDeniedHandler.java] 
+.................................................. 
+[FILE: api\security\JwtAuthenticationEntryPoint.java] 
+package com.lp2.sisinventario.sistemainventario.api.security;
+
+public class JwtAuthenticationEntryPoint {
+}
+ 
+[END: api\security\JwtAuthenticationEntryPoint.java] 
+.................................................. 
+[FILE: api\security\JwtAuthenticationFilter.java] 
+package com.lp2.sisinventario.sistemainventario.api.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String username;
+
+        
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        jwt = authHeader.substring(7);
+
+        try {
+            username = jwtService.extractUsername(jwt);
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+                if (jwtService.isTokenValid(jwt)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+             
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error validando JWT: " + e.getMessage());
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
+ 
+[END: api\security\JwtAuthenticationFilter.java] 
+.................................................. 
+[FILE: api\security\JwtService.java] 
+package com.lp2.sisinventario.sistemainventario.api.security;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
+
+@Service
+public class JwtService {
+
+    private static final String SECRET_KEY = "RadiosTetra@2026#SistemaLogistico$JWT%ClavePrivada123456789";
+    private static final long EXPIRATION_MS = 1000 * 60 * 60 * 8; // 8 horas
+
+    public String generateToken(String username, String role) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + EXPIRATION_MS);
+
+        return Jwts.builder()
+                .subject(username)
+                .claims(Map.of("role", role))
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+}
+ 
+[END: api\security\JwtService.java] 
+.................................................. 
+[FILE: api\service\AuthApiService.java] 
+package com.lp2.sisinventario.sistemainventario.api.service;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthResponse;
+
+public interface AuthApiService {
+    AuthResponse login(AuthRequest request);
+}
+ 
+[END: api\service\AuthApiService.java] 
+.................................................. 
+[FILE: api\service\RadioApiService.java] 
+package com.lp2.sisinventario.sistemainventario.api.service;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.CatalogoItemResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioResponse;
+
+import java.util.List;
+
+public interface RadioApiService {
+
+    List<RadioResponse> listar(String texto);
+    RadioResponse obtener(Integer id);
+    Integer crear(RadioRequest request);
+    Integer actualizar(Integer id, RadioRequest request);
+    void eliminar(Integer id);
+    List<CatalogoItemResponse> listarModelos();
+    List<CatalogoItemResponse> listarEstados();
+}
+ 
+[END: api\service\RadioApiService.java] 
+.................................................. 
+[FILE: api\service\impl\AuthApiServiceImpl.java] 
+package com.lp2.sisinventario.sistemainventario.api.service.impl;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.AuthResponse;
+import com.lp2.sisinventario.sistemainventario.api.security.JwtService;
+import com.lp2.sisinventario.sistemainventario.api.service.AuthApiService;
+import com.lp2.sisinventario.sistemainventario.api.model.UsuarioApi;
+import com.lp2.sisinventario.sistemainventario.api.repository.UsuarioApiRepository;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthApiServiceImpl implements AuthApiService {
+
+	private final UsuarioApiRepository usuarioRepository;
+    private final JwtService jwtService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    public AuthApiServiceImpl(UsuarioApiRepository usuarioRepository, JwtService jwtService, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public AuthResponse login(AuthRequest request) {
+        UsuarioApi usuario = usuarioRepository.findByNombre(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("UsuarioApi no encontrado"));
+
+        if (!passwordEncoder.matches(request.getPassword(), usuario.getClave())) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        String role = "USER";
+        if (usuario.getRol() != null) {
+            role = usuario.getRol().getRolNombre();
+        }
+
+        String token = jwtService.generateToken(usuario.getNombre(), role);
+
+        return new AuthResponse(token, "Bearer", usuario.getNombre(), role);
+    }
+}
+ 
+[END: api\service\impl\AuthApiServiceImpl.java] 
+.................................................. 
+[FILE: api\service\impl\RadioApiServiceImpl.java] 
+package com.lp2.sisinventario.sistemainventario.api.service.impl;
+
+import com.lp2.sisinventario.sistemainventario.api.dto.CatalogoItemResponse;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioRequest;
+import com.lp2.sisinventario.sistemainventario.api.dto.RadioResponse;
+import com.lp2.sisinventario.sistemainventario.api.repository.RadioApiRepository;
+import com.lp2.sisinventario.sistemainventario.api.service.RadioApiService;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class RadioApiServiceImpl implements RadioApiService {
+
+    private final RadioApiRepository radioApiRepository;
+
+    public RadioApiServiceImpl(RadioApiRepository radioApiRepository) {
+        this.radioApiRepository = radioApiRepository;
+    }
+
+    @Override
+    public List<RadioResponse> listar(String texto) {
+        return radioApiRepository.listar(texto);
+    }
+
+    @Override
+    public RadioResponse obtener(Integer id) {
+        return radioApiRepository.obtener(id);
+    }
+
+    @Override
+    public Integer crear(RadioRequest request) {
+        return radioApiRepository.guardar(request);
+    }
+
+    @Override
+    public Integer actualizar(Integer id, RadioRequest request) {
+        request.setId(id);
+        return radioApiRepository.guardar(request);
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        radioApiRepository.eliminar(id);
+    }
+
+    @Override
+    public List<CatalogoItemResponse> listarModelos() {
+        return radioApiRepository.listarModelos();
+    }
+
+    @Override
+    public List<CatalogoItemResponse> listarEstados() {
+        return radioApiRepository.listarEstados();
+    }
+}
+ 
+[END: api\service\impl\RadioApiServiceImpl.java] 
+.................................................. 
+[FILE: config\SecurityConfig.java] 
+//package com.lp2.sisinventario.sistemainventario.config;
+//
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.security.authentication.AuthenticationProvider;
+//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.core.userdetails.UserDetailsService;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.web.SecurityFilterChain;
+//
+//@Configuration
+//public class SecurityConfig {
+//
+//    @Bean
+//    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(
+//                                "/login",
+//                                "/api/auth/**",
+//                                "/api/radios/**", // (si quieres pruebas r谩pidas)
+//
+//                                "/v3/api-docs/**",
+//                                "/swagger-ui/**",
+//                                "/swagger-ui.html",
+//                                "/swagger-ui/index.html",
+//                                "/swagger-resources/**",
+//                                "/webjars/**",
+//
+//                                "/css/**",
+//                                "/js/**",
+//                                "/images/**",
+//                                "/actuator/**"
+//                        ).permitAll()
+//                        .requestMatchers("/", "/dashboard", "/modelos/**").authenticated()
+//                        .anyRequest().authenticated()
+//                )
+//                .formLogin(login -> login
+//                        .loginPage("/login")
+//                        .defaultSuccessUrl("/dashboard", true)
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+////                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"))
+////                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+//                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**", "/api/**"));
+//        return http.build();
+//    }
+//
+//    @Bean
+//    PasswordEncoder passwordEncoder() {
+//        // SOLO PARA DESARROLLO: no en producci贸n
+//        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+//    }
+//
+//    @Bean
+//    public AuthenticationProvider authenticationProvider(
+//            UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+//        var provider = new DaoAuthenticationProvider();
+//        provider.setUserDetailsService(userDetailsService);
+//        provider.setPasswordEncoder(passwordEncoder);
+//        return provider;
+//    }
+//}
+package com.lp2.sisinventario.sistemainventario.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import com.lp2.sisinventario.sistemainventario.api.security.JwtAuthenticationFilter;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/login",
+                                "/api/auth/**",
+                                "/api/radios/**",
+
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/actuator/**"
+                        ).permitAll()
+                        .requestMatchers("/", "/dashboard", "/modelos/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .permitAll()
+                )
+
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+        http.addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        var provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+} 
+[END: config\SecurityConfig.java] 
+.................................................. 
+[FILE: controller\AuthController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class AuthController {
+    @GetMapping("/login")
+    public String login() {
+        return "auth/login"; 
+    }
+}
+ 
+[END: controller\AuthController.java] 
+.................................................. 
+[FILE: controller\ClienteController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+
+import com.lp2.sisinventario.sistemainventario.model.Cliente;
+import com.lp2.sisinventario.sistemainventario.service.ClienteService;
+
+@Controller
+@RequestMapping("/cliente")
+@RequiredArgsConstructor
+public class ClienteController {
+	
+	private final ClienteService clienteService;
+	
+	@GetMapping
+	public String getClientes(Model model){
+		model.addAttribute("clientes", clienteService.getClientes());
+		return "clientes/clientes.html";
+	}
+	
+	@GetMapping("/nuevo")
+	public String nuevoCliente(Model model){
+		model.addAttribute("cliente", new Cliente());
+		model.addAttribute("titulo", "Nuevo cliente");
+		return "clientes/clientes-form.html";
+	}
+	
+	@GetMapping("/editar/{id}")
+	public String editarCliente(@PathVariable Integer id, Model model){
+		model.addAttribute("cliente", clienteService.getClienteById(id));
+		model.addAttribute("titulo", "Editar cliente");
+		return "clientes/clientes-form.html";
+	}
+	
+	@PostMapping("/guardar")
+	public String guardarCliente(@ModelAttribute Cliente cliente) {
+		clienteService.guardar(cliente);
+		return "redirect:/cliente";
+	}
+	
+	@PostMapping("/eliminar/{id}")
+	public String eliminarCliente(@PathVariable Integer id, Model model){
+		clienteService.deleteCliente(id);
+		return "redirect:/cliente";
+	}
+} 
+[END: controller\ClienteController.java] 
+.................................................. 
+[FILE: controller\ContratoController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+
+import com.lp2.sisinventario.sistemainventario.dto.ContratoFiltroDTO;
+import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
+import com.lp2.sisinventario.sistemainventario.model.Contrato;
+import com.lp2.sisinventario.sistemainventario.service.ClienteService;
+import com.lp2.sisinventario.sistemainventario.service.ContratoService;
+import com.lp2.sisinventario.sistemainventario.service.impl.ModeloServiceImpl;
+
+@Controller
+@RequestMapping("/contrato")
+@RequiredArgsConstructor
+public class ContratoController {
+	
+	private final ContratoService contratoService;
+	private final ClienteService clienteService;
+	private final ModeloServiceImpl modeloServiceImpl;
+	
+	@GetMapping
+	public String getContratos(@RequestParam(required = false) String estado,
+	        @RequestParam(required = false) Integer idCliente,
+	        @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaIni,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fechaFin,
+	        Model model) {
+		
+		ContratoFiltroDTO filtros = new ContratoFiltroDTO();
+		filtros.setClienteId(idCliente);
+		filtros.setEstado(estado);
+		filtros.setFechaFin(fechaFin);
+		filtros.setFechaInicio(fechaIni); 
+		
+		List<ContratoResumenDTO> contratos = contratoService.obtenerResumenContratos(filtros);
+		
+		model.addAttribute("contratos", contratos);
+		model.addAttribute("clientes", clienteService.getClientes());
+		return "contrato/contrato.html";
+	}
+	
+	@GetMapping("/nuevo")
+	public String nuevoContrato(Model model) {
+		model.addAttribute("contrato", new Contrato());
+		model.addAttribute("titulo", "Nuevo contrato");
+		model.addAttribute("clientes", clienteService.getClientes());
+		model.addAttribute("modelos", modeloServiceImpl.listar());
+		model.addAttribute("listaDetalleContrato", new ArrayList<>());
+		return "contrato/contrato-form.html";
+	}
+	
+	@GetMapping("/editar/{id}")
+	public String editarContrato(@PathVariable Integer id,Model model) {
+		
+		Contrato contratoSeleccionado = contratoService.getContratoById(id);
+		
+		model.addAttribute("contrato", contratoSeleccionado);
+		model.addAttribute("clienteIdSeleccionado", contratoSeleccionado.getCliente().getId());
+			
+		model.addAttribute("clientes", clienteService.getClientes());
+		model.addAttribute("modelos", modeloServiceImpl.listar());
+		model.addAttribute("listaDetalleContrato", contratoSeleccionado.getDetalles());
+			
+		model.addAttribute("titulo", "Editar contrato");
+		return "contrato/contrato-form.html";
+	}
+} 
+[END: controller\ContratoController.java] 
+.................................................. 
+[FILE: controller\DashboardController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class DashboardController {
+
+    @GetMapping({"/", "/dashboard"})
+    public String dashboard() {
+        return "dashboard/index";
+    }
+}
+ 
+[END: controller\DashboardController.java] 
+.................................................. 
+[FILE: controller\LoginController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+
+public class LoginController {
+}
+ 
+[END: controller\LoginController.java] 
+.................................................. 
+[FILE: controller\ModeloController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import com.lp2.sisinventario.sistemainventario.dto.ModeloRequest;
+import com.lp2.sisinventario.sistemainventario.service.ModeloService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/modelos")
+@RequiredArgsConstructor
+public class ModeloController {
+
+
+    private final ModeloService service;
+
+    @GetMapping({"", "/"})
+    public String listar(Model model) {
+        model.addAttribute("modelos", service.listar());
+        return "modelo/list";
+    }
+
+    @GetMapping("/nuevo")
+    public String nuevo(Model model) {
+        model.addAttribute("modelo", new ModeloRequest());
+        model.addAttribute("titulo", "Nuevo Modelo");
+        return "modelo/form";
+    }
+
+    @PostMapping({"", "/"}) // CREAR
+    public String crear(@Valid @ModelAttribute("modelo") ModeloRequest req,
+                        BindingResult br,
+                        RedirectAttributes ra,
+                        Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("titulo", "Nuevo Modelo");
+            return "modelo/form";
+        }
+        service.crear(req);
+        ra.addFlashAttribute("success", "Modelo creado correctamente");
+        return "redirect:/modelos";
+    }
+
+    @GetMapping("/{id}/editar")
+    public String editar(@PathVariable Integer id, Model model) {
+        var dto = service.obtener(id);
+        var req = new ModeloRequest();
+        req.setId(dto.getId());
+        req.setDescripcion(dto.getDescripcion());
+        req.setCodigo(dto.getCodigo());
+        model.addAttribute("modelo", req);
+        model.addAttribute("titulo", "Editar Modelo");
+        return "modelo/form";
+    }
+
+    @PostMapping("/{id}") // ACTUALIZAR
+    public String actualizar(@PathVariable Integer id,
+                             @Valid @ModelAttribute("modelo") ModeloRequest req,
+                             BindingResult br,
+                             RedirectAttributes ra,
+                             Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("titulo", "Editar Modelo");
+            return "modelo/form";
+        }
+        req.setId(id);
+        service.actualizar(req);
+        ra.addFlashAttribute("success", "Modelo actualizado");
+        return "redirect:/modelos";
+    }
+
+    @PostMapping("/{id}/eliminar") // ELIMINAR
+    public String eliminar(@PathVariable Integer id, RedirectAttributes ra) {
+        service.eliminar(id);
+        ra.addFlashAttribute("success", "Modelo eliminado");
+        return "redirect:/modelos";
+    }
+}
+ 
+[END: controller\ModeloController.java] 
+.................................................. 
+[FILE: controller\PingController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+import com.lp2.sisinventario.sistemainventario.service.PingService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.OffsetDateTime;
+
+@RestController
+public class PingController {
+
+    private final PingService pingService;
+
+    public PingController(PingService pingService) {
+        this.pingService = pingService;
+    }
+
+    @GetMapping("/ping-db")
+    public ResponseEntity<?> pingDb() {
+        boolean ok = pingService.ping();
+        return ResponseEntity.ok(new PingResponse(ok ? "UP" : "DOWN", OffsetDateTime.now().toString()));
+    }
+
+    static class PingResponse {
+        public final String status;
+        public final String timestamp;
+        PingResponse(String status, String timestamp) {
+            this.status = status;
+            this.timestamp = timestamp;
+        }
+    }
+}
+ 
+[END: controller\PingController.java] 
+.................................................. 
+[FILE: controller\RadioController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+public class RadioController {
+}
+ 
+[END: controller\RadioController.java] 
+.................................................. 
+[FILE: controller\UserController.java] 
+package com.lp2.sisinventario.sistemainventario.controller;
+
+public class UserController {
+}
+ 
+[END: controller\UserController.java] 
+.................................................. 
+[FILE: dto\ContratoFiltroDTO.java] 
+package com.lp2.sisinventario.sistemainventario.dto;
+
+import java.time.LocalDate;
+
+public class ContratoFiltroDTO {
+    public Integer getClienteId() {
+		return clienteId;
+	}
+
+	public void setClienteId(Integer clienteId) {
+		this.clienteId = clienteId;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
+	public LocalDate getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(LocalDate fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public LocalDate getFechaFin() {
+		return fechaFin;
+	}
+
+	public void setFechaFin(LocalDate fechaFin) {
+		this.fechaFin = fechaFin;
+	}
+
+	private Integer clienteId;
+    private String estado;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
+    
+    public ContratoFiltroDTO() {}
+    
+    public ContratoFiltroDTO(Integer clienteId, String estado, LocalDate fechaInicio, LocalDate fechaFin) {
+        this.clienteId = clienteId;
+        this.estado = estado;
+        this.fechaInicio = fechaInicio;
+        this.fechaFin = fechaFin;
+    }
+}
+ 
+[END: dto\ContratoFiltroDTO.java] 
+.................................................. 
+[FILE: dto\ContratoResumenDTO.java] 
+package com.lp2.sisinventario.sistemainventario.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class ContratoResumenDTO {
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer getClienteId() {
+		return clienteId;
+	}
+
+	public void setClienteId(Integer clienteId) {
+		this.clienteId = clienteId;
+	}
+
+	public String getNumero() {
+		return numero;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
+
+	public LocalDate getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(LocalDate fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public LocalDate getFechaFin() {
+		return fechaFin;
+	}
+
+	public void setFechaFin(LocalDate fechaFin) {
+		this.fechaFin = fechaFin;
+	}
+
+	public BigDecimal getValorMensual() {
+		return valorMensual;
+	}
+
+	public void setValorMensual(BigDecimal valorMensual) {
+		this.valorMensual = valorMensual;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
+	public Long getNroRadios() {
+		return nroRadios;
+	}
+
+	public void setNroRadios(Long nroRadios) {
+		this.nroRadios = nroRadios;
+	}
+
+	public String getRazonSocial() {
+		return razonSocial;
+	}
+
+	public void setRazonSocial(String razonSocial) {
+		this.razonSocial = razonSocial;
+	}
+
+	public ContratoResumenDTO() {
+		super();
+	}
+
+	private Integer id;
+	private Integer clienteId;
+	private String numero;
+	private LocalDate fechaInicio;
+	private LocalDate fechaFin;
+	private BigDecimal valorMensual;
+	private String estado;
+	private Long nroRadios;
+	private String razonSocial;
+
+	public ContratoResumenDTO(Integer id, Integer clienteId, String numero, LocalDate fechaInicio, LocalDate fechaFin,
+			BigDecimal valorMensual, String estado, Long nroRadios, String razonSocial) {
+		this.id = id;
+		this.clienteId = clienteId;
+		this.numero = numero;
+		this.fechaInicio = fechaInicio;
+		this.fechaFin = fechaFin;
+		this.valorMensual = valorMensual;
+		this.estado = estado;
+		this.nroRadios = nroRadios;
+		this.razonSocial = razonSocial;
+	}
+}
+ 
+[END: dto\ContratoResumenDTO.java] 
+.................................................. 
+[FILE: dto\ModeloRequest.java] 
+package com.lp2.sisinventario.sistemainventario.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class ModeloRequest {
+    private Integer id;
+
+    @NotBlank(message = "La descripci贸n es obligatoria")
+    private String descripcion;
+
+    @NotBlank(message = "El c贸digo es obligatorio")
+    private String codigo;
+}
+ 
+[END: dto\ModeloRequest.java] 
+.................................................. 
+[FILE: dto\ModeloResponse.java] 
+package com.lp2.sisinventario.sistemainventario.dto;
+
+import lombok.Value;
+
+@Value
+public class ModeloResponse {
+    Integer id;
+    String descripcion;
+    String codigo;
+}
+ 
+[END: dto\ModeloResponse.java] 
+.................................................. 
+[FILE: model\Cliente.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name="clientes")
+public class Cliente {
+	public Cliente(int id, String codigo, String razonSocial, String tipoDocumento, String numeroDocumento,
+			String direccion, String telefono, String email, String contacto, boolean activo) { // int usuarioId
+		super();
+		this.setId(id);
+		this.codigo = codigo;
+		this.razonSocial = razonSocial;
+		this.tipoDocumento = tipoDocumento;
+		this.numeroDocumento = numeroDocumento;
+		this.direccion = direccion;
+		this.telefono = telefono;
+		this.email = email;
+		this.contacto = contacto;
+		this.fechaRegistro = LocalDateTime.now();
+		this.usuarioId = 1;
+		this.activo = activo;
+	}
+	
+	public Cliente(String codigo, String razonSocial, String tipoDocumento, String numeroDocumento,
+			String direccion, String telefono, String email, String contacto,  boolean activo) {
+		this(0, codigo, razonSocial, tipoDocumento, numeroDocumento, direccion, telefono, email, contacto, activo);
+	}
+	
+	public Cliente() {
+		this(0, "", "", "", "", "", "", "", "", true);
+	}
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	
+    public String getCodigo() {
+		return codigo;
+	}
+
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
+	}
+
+	public String getRazonSocial() {
+		return razonSocial;
+	}
+
+	public void setRazonSocial(String razonSocial) {
+		this.razonSocial = razonSocial;
+	}
+
+	public String getTipoDocumento() {
+		return tipoDocumento;
+	}
+
+	public void setTipoDocumento(String tipoDocumento) {
+		this.tipoDocumento = tipoDocumento;
+	}
+
+	public String getNumeroDocumento() {
+		return numeroDocumento;
+	}
+
+	public void setNumeroDocumento(String numeroDocumento) {
+		this.numeroDocumento = numeroDocumento;
+	}
+
+	public String getDireccion() {
+		return direccion;
+	}
+
+	public void setDireccion(String direccion) {
+		this.direccion = direccion;
+	}
+
+	public String getTelefono() {
+		return telefono;
+	}
+
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getContacto() {
+		return contacto;
+	}
+
+	public void setContacto(String contacto) {
+		this.contacto = contacto;
+	}
+	
+	public int getUsuarioId() {
+		return usuarioId;
+	}
+
+	public void setUsuarioId(int usuarioId) {
+		this.usuarioId = usuarioId;
+	}
+	
+	
+	public boolean getActivo() {
+		return activo;
+	}
+
+	public void setUsuarioId(boolean activo) {
+		this.activo = activo;
+	}
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="cli_id")
+	private Integer id;
+	
+	@Column(name="cli_codigo")
+	private String codigo;
+	
+	@Column(name="cli_razonSocial")
+    private String razonSocial;
+	
+	@Column(name="cli_tipoDocumento")
+    private String tipoDocumento;
+	
+	@Column(name="cli_nroDocumento")
+    private String numeroDocumento;
+	
+	@Column(name="cli_direccion")
+    private String direccion;
+	
+	@Column(name="cli_telefono")
+    private String telefono;
+	
+	@Column(name="cli_email")
+    private String email;
+	
+	@Column(name="cli_contacto")
+    private String contacto;
+	
+	@Column(name="cli_activo")
+    private boolean activo;
+	
+	@Column(name = "\"cli_filaFecha\"")
+    private LocalDateTime fechaRegistro;
+    
+	@Column(name="cli_filaeliminada")
+    private String registroEliminado;
+	
+	@Column(name="usa_id")
+    private int usuarioId;
+} 
+[END: model\Cliente.java] 
+.................................................. 
+[FILE: model\Contrato.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+
+@Entity
+@Table(name="contratos")
+public class Contrato {
+    public int getId() {
+		return id;
+	}
+
+	public Contrato() {
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
+
+	public String getNumero() {
+		return numero;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
+
+	public LocalDate getFechaInicio() {
+		return fechaInicio;
+	}
+
+	public void setFechaInicio(LocalDate fechaInicio) {
+		this.fechaInicio = fechaInicio;
+	}
+
+	public LocalDate getFechaFin() {
+		return fechaFin;
+	}
+
+	public void setFechaFin(LocalDate fechaFin) {
+		this.fechaFin = fechaFin;
+	}
+
+	public String getEstado() {
+		return estado;
+	}
+
+	public void setEstado(String estado) {
+		this.estado = estado;
+	}
+
+	public String getTipoContrato() {
+		return tipoContrato;
+	}
+
+	public void setTipoContrato(String tipoContrato) {
+		this.tipoContrato = tipoContrato;
+	}
+
+	public BigDecimal getValorTotal() {
+		return valorTotal;
+	}
+
+	public void setValorTotal(BigDecimal valorTotal) {
+		this.valorTotal = valorTotal;
+	}
+
+	public BigDecimal getValorMensual() {
+		return valorMensual;
+	}
+
+	public void setValorMensual(BigDecimal valorMensual) {
+		this.valorMensual = valorMensual;
+	}
+
+	public String getObservaciones() {
+		return observaciones;
+	}
+
+	public void setObservaciones(String observaciones) {
+		this.observaciones = observaciones;
+	}
+
+	public boolean isEliminado() {
+		return eliminado;
+	}
+
+	public void setEliminado(boolean eliminado) {
+		this.eliminado = eliminado;
+	}
+
+	public int getUsuarioId() {
+		return usuarioId;
+	}
+
+	public void setUsuarioId(int usuarioId) {
+		this.usuarioId = usuarioId;
+	}
+
+	public List<DetalleContrato> getDetalles() {
+		return detalles;
+	}
+
+	public void setDetalles(List<DetalleContrato> detalles) {
+		this.detalles = detalles;
+	}
+
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "con_id")
+    private int id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cli_id", nullable = false)
+    private Cliente cliente;
+
+    @Column(name = "con_numero", nullable = false, length = 100, unique = true)
+    private String numero;
+
+    @Column(name = "con_fechaInicio", nullable = false)
+    private LocalDate fechaInicio;
+
+    @Column(name = "con_fechaFin", nullable = false)
+    private LocalDate fechaFin;
+
+    @Column(name = "con_estado", length = 50)
+    private String estado;
+
+    @Column(name = "con_tipoContrato", length = 50)
+    private String tipoContrato;
+
+    @Column(name = "con_valorTotal", precision = 12, scale = 2)
+    private BigDecimal valorTotal;
+
+    @Column(name = "con_valorMensual", precision = 10, scale = 2)
+    private BigDecimal valorMensual;
+
+    @Column(name = "con_observaciones", columnDefinition = "TEXT")
+    private String observaciones;
+
+    @Column(name = "con_filaEliminada")
+    private boolean eliminado;
+
+    @Column(name = "usa_id")
+    private int usuarioId;
+    
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleContrato> detalles;
+	
+}
+ 
+[END: model\Contrato.java] 
+.................................................. 
+[FILE: model\DetalleContrato.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import java.math.BigDecimal;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "detalleContratos")
+public class DetalleContrato {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "dec_id")
+    private int id;
+
+//    @Column(name = "con_id", nullable = false)
+  //  private int contratoId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "con_id", nullable = false)
+    private Contrato contrato;
+
+    @Column(name = "mod_id", nullable = false)
+    private int modeloId;
+
+    @Column(name = "dec_cantidad", nullable = false)
+    private int cantidad;
+
+    @Column(name = "dec_precioUnitario", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioUnitario;
+
+    @Column(name = "dec_subtotal", nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(name = "dec_filaEliminada", nullable = false)
+    private boolean eliminado;
+
+    @Column(name = "usa_id")
+    private int usuarioId;
+}
+ 
+[END: model\DetalleContrato.java] 
+.................................................. 
+[FILE: model\Modelo.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "modeloRadio")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Modelo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "mod_id")
+    private Integer id;
+
+    @Column(name = "mod_descripcion", nullable = false, length = 200)
+    private String descripcion;
+
+    @Column(name = "mod_codigo", nullable = false, length = 50)
+    private String codigo;
+}
+ 
+[END: model\Modelo.java] 
+.................................................. 
+[FILE: model\Rol.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "roles")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Rol {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "rol_id")
+    private Integer id;
+
+    @Column(name = "rol_nombre", nullable = false, unique = true, length = 100)
+    private String nombre; // Ej.: ROLE_ADMIN, ROLE_USER
+
+    @Column(name = "rol_estado", length = 100)
+    private String estado;
+
+    @Column(name = "rol_activo")
+    private Byte activo; // opcional, si lo usas
+}
+ 
+[END: model\Rol.java] 
+.................................................. 
+[FILE: model\Usuario.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "usuarios")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "usa_id")
+    private Integer id;
+
+    // username (login)
+    @Column(name = "nombre", nullable = false, unique = true, length = 100)
+    private String username;
+
+    // password (BCrypt)
+    @Column(name = "clave", nullable = false, length = 100)
+    private String password;
+
+    // tu columna es VARCHAR; lo convertimos a boolean con un converter
+    @Convert(converter = com.lp2.sisinventario.sistemainventario.model.VarcharBooleanConverter.class)
+    @Column(name = "usa_activo", length = 100)
+    @Convert(converter = VarcharBooleanConverter.class)
+    private Boolean enabled;
+
+    // muchos usuarios -> un rol (columna "rol" FK a roles.rol_id)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rol", referencedColumnName = "rol_id")
+    private Rol rol;
+
+    // --- columnas adicionales si luego quieres usarlas ---
+    @Column(name = "usa_nombres", length = 100) private String nombres;
+    @Column(name = "usa_apellidopaterno", length = 100) private String apellidoPaterno;
+    @Column(name = "usa_apellidomaterno", length = 100) private String apellidoMaterno;
+    @Column(name = "usa_estado", length = 100) private String estado;
+    @Column(name = "usa_genero", length = 100) private String genero;
+}
+ 
+[END: model\Usuario.java] 
+.................................................. 
+[FILE: model\VarcharBooleanConverter.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
+
+@Converter
+public class VarcharBooleanConverter implements AttributeConverter<Boolean, String>{
+
+    @Override
+    public String convertToDatabaseColumn(Boolean value) { return value==null?null:(value?"1":"0"); }
+    @Override
+    public Boolean convertToEntityAttribute(String value) {
+        if (value == null) return null;
+        var v = value.trim().toLowerCase();
+        return v.equals("1") || v.equals("si") || v.equals("true") || v.equals("activo");
+    }
+}
+ 
+[END: model\VarcharBooleanConverter.java] 
+.................................................. 
+[FILE: repository\ClienteRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.lp2.sisinventario.sistemainventario.model.Cliente;
+
+@Repository
+public interface ClienteRepository extends JpaRepository<Cliente, Integer>{
+
+}
+ 
+[END: repository\ClienteRepository.java] 
+.................................................. 
+[FILE: repository\ContratoRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import org.springframework.stereotype.Repository;
+import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
+import com.lp2.sisinventario.sistemainventario.model.Contrato;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+@Repository
+public interface ContratoRepository extends JpaRepository<Contrato, Integer> {
+
+    @Query("SELECT new com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO(" +
+           "    c.id, c.cliente.id, c.numero, c.fechaInicio, c.fechaFin, " +
+           "    c.valorMensual, c.estado, COUNT(d.id), c.cliente.razonSocial) " +
+           "FROM Contrato c LEFT JOIN c.detalles d " +
+           "GROUP BY c.id, c.cliente.id, c.numero, c.fechaInicio, c.fechaFin, c.valorMensual, c.estado, c.cliente.razonSocial")
+    List<ContratoResumenDTO> buscarTodosParaResumen();
+
+    @Query("SELECT c FROM Contrato c LEFT JOIN FETCH c.cliente LEFT JOIN FETCH c.detalles WHERE c.id = :id")
+    Optional<Contrato> findByIdWithRelation(@Param("id") Integer id);
+} 
+[END: repository\ContratoRepository.java] 
+.................................................. 
+[FILE: repository\ModeloRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import com.lp2.sisinventario.sistemainventario.model.Modelo;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface  ModeloRepository extends JpaRepository<Modelo, Integer>{
+    boolean existsByCodigoIgnoreCase(String codigo);
+}
+ 
+[END: repository\ModeloRepository.java] 
+.................................................. 
+[FILE: repository\RolRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import com.lp2.sisinventario.sistemainventario.model.Rol;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RolRepository extends JpaRepository<Rol, Integer> {}
+ 
+[END: repository\RolRepository.java] 
+.................................................. 
+[FILE: repository\UsuarioRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import com.lp2.sisinventario.sistemainventario.model.Usuario;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+    Optional<Usuario> findByUsername(String username);
+} 
+[END: repository\UsuarioRepository.java] 
+.................................................. 
+[FILE: service\ClienteService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+
+import com.lp2.sisinventario.sistemainventario.model.Cliente;
+import com.lp2.sisinventario.sistemainventario.repository.ClienteRepository;
+
+@Service
+@RequiredArgsConstructor
+public class ClienteService {
+        
+    private final ClienteRepository clienteRepository;
+    
+    public List<Cliente> getClientes(){
+        return clienteRepository.findAll();
+    }
+    
+    public Cliente getClienteById(Integer id) {
+        return clienteRepository.findById(id).orElse(null);
+    }
+    
+    public void guardar(Cliente cliente) {
+        clienteRepository.save(cliente);
+    }
+    
+    public void deleteCliente(Integer id) {
+        clienteRepository.deleteById(id);
+    }
+} 
+[END: service\ClienteService.java] 
+.................................................. 
+[FILE: service\ContratoService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+
+import com.lp2.sisinventario.sistemainventario.dto.ContratoFiltroDTO;
+import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
+import com.lp2.sisinventario.sistemainventario.model.Contrato;
+import com.lp2.sisinventario.sistemainventario.repository.ContratoRepository;
+
+@Service
+@RequiredArgsConstructor
+public class ContratoService {
+	
+	private final ContratoRepository contratoRepository;
+	
+	public List<ContratoResumenDTO> obtenerResumenContratos(ContratoFiltroDTO filtro) {
+		return contratoRepository.buscarTodosParaResumen();
+	}
+	
+	public Contrato getContratoById(Integer id) {
+		return contratoRepository.findByIdWithRelation(id).orElse(null);
+	}
+} 
+[END: service\ContratoService.java] 
+.................................................. 
+[FILE: service\JpaUserDetailsService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import com.lp2.sisinventario.sistemainventario.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class JpaUserDetailsService implements UserDetailsService {
+
+    private final UsuarioRepository usuarios;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        var u = usuarios.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("UsuarioApi no encontrado"));
+
+        boolean enabled = u.getEnabled() == null ? true : u.getEnabled();
+        var rol = (u.getRol()!=null ? u.getRol().getNombre() : "ROLE_USER");
+
+        log.info("Auth usuario={}, enabled={}, rol={}", u.getUsername(), enabled, rol);
+
+        return User.builder()
+                .username(u.getUsername())
+                .password(u.getPassword())
+                .authorities(new SimpleGrantedAuthority(rol))
+                .disabled(!enabled)
+                .build();
+    }
+}
+ 
+[END: service\JpaUserDetailsService.java] 
+.................................................. 
+[FILE: service\ModeloService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import com.lp2.sisinventario.sistemainventario.dto.ModeloRequest;
+import com.lp2.sisinventario.sistemainventario.dto.ModeloResponse;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+public interface ModeloService {
+    List<ModeloResponse> listar();
+    ModeloResponse obtener(Integer id);
+    ModeloResponse crear(ModeloRequest req);
+    ModeloResponse actualizar(ModeloRequest req);
+    void eliminar(Integer id);
+}
+ 
+[END: service\ModeloService.java] 
+.................................................. 
+[FILE: service\PingService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PingService {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public PingService(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public boolean ping() {
+        try {
+            // Retorna 1 si hay conexi贸n OK
+            Integer one = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            return one != null && one == 1;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+}
+ 
+[END: service\PingService.java] 
+.................................................. 
+[FILE: service\UsuarioService.java] 
+package com.lp2.sisinventario.sistemainventario.service;
+
+import com.lp2.sisinventario.sistemainventario.model.Usuario;
+
+import java.util.List;
+
+public interface UsuarioService
+{
+	List<Usuario> obtenerUsuarios();
+}
+ 
+[END: service\UsuarioService.java] 
+.................................................. 
+[FILE: service\impl\ModeloServiceImpl.java] 
+package com.lp2.sisinventario.sistemainventario.service.impl;
+
+import com.lp2.sisinventario.sistemainventario.dto.ModeloRequest;
+import com.lp2.sisinventario.sistemainventario.dto.ModeloResponse;
+import com.lp2.sisinventario.sistemainventario.model.Modelo;
+import com.lp2.sisinventario.sistemainventario.repository.ModeloRepository;
+import com.lp2.sisinventario.sistemainventario.service.ModeloService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service                         // <-- FALTABA
+@RequiredArgsConstructor         // <-- FALTABA (inyecta el final repo)
+@Transactional                   // (opcional pero recomendado a nivel de servicio)
+public class ModeloServiceImpl implements ModeloService {
+
+    private final ModeloRepository repo;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ModeloResponse> listar() {
+        return repo.findAll().stream()
+                .map(m -> new ModeloResponse(m.getId(), m.getDescripcion(), m.getCodigo()))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ModeloResponse obtener(Integer id) {
+        Modelo m = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Modelo no existe"));
+        return new ModeloResponse(m.getId(), m.getDescripcion(), m.getCodigo());
+    }
+
+    @Override
+    public ModeloResponse crear(ModeloRequest req) {
+        if (repo.existsByCodigoIgnoreCase(req.getCodigo())) {
+            throw new IllegalArgumentException("C贸digo de modelo ya existe");
+        }
+        Modelo m = Modelo.builder()
+                .descripcion(req.getDescripcion())
+                .codigo(req.getCodigo())
+                .build();
+        m = repo.save(m);
+        return new ModeloResponse(m.getId(), m.getDescripcion(), m.getCodigo());
+    }
+
+    @Override
+    public ModeloResponse actualizar(ModeloRequest req) {
+        Modelo m = repo.findById(req.getId()).orElseThrow(() -> new IllegalArgumentException("Modelo no existe"));
+        m.setDescripcion(req.getDescripcion());
+        m.setCodigo(req.getCodigo());
+        m = repo.save(m);
+        return new ModeloResponse(m.getId(), m.getDescripcion(), m.getCodigo());
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        if (!repo.existsById(id)) throw new IllegalArgumentException("Modelo no existe");
+        repo.deleteById(id);
+    }
+}
+ 
+[END: service\impl\ModeloServiceImpl.java] 
+.................................................. 
+ 
+[RECURSOS ADICIONALES Y ASSETS] 

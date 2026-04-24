@@ -123,7 +123,7 @@ public class Cliente {
 		return activo;
 	}
 
-	public void setUsuarioId(boolean activo) {
+	public void setActivo(boolean activo) {
 		this.activo = activo;
 	}
 	
