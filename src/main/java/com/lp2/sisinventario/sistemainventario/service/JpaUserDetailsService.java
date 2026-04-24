@@ -19,17 +19,22 @@ public class JpaUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var u = usuarios.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         boolean enabled = u.getEnabled() == null ? true : u.getEnabled();
-        var rol = (u.getRol()!=null ? u.getRol().getNombre() : "ROLE_USER");
+        String rol = "ROLE_USER";
 
-        log.info("Auth usuario={}, enabled={}, rol={}", u.getUsername(), enabled, rol);
+        if (u.getRol() != null && u.getRol().getNombre() != null) {
+            rol = u.getRol().getNombre();
+        }
+
+        log.info("Auth usuario={}, passwordBD={}, enabled={}, rol={}",
+                u.getUsername(), u.getPassword(), enabled, rol);
 
         return User.builder()
                 .username(u.getUsername())
                 .password(u.getPassword())
-                .authorities(new SimpleGrantedAuthority(rol))
+                .authorities(List.of(new SimpleGrantedAuthority(rol)))
                 .disabled(!enabled)
                 .build();
     }

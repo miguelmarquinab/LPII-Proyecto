@@ -22,9 +22,10 @@ public class Usuario {
     private String password;
 
     // tu columna es VARCHAR; lo convertimos a boolean con un converter
-    @Convert(converter = com.lp2.sisinventario.sistemainventario.model.VarcharBooleanConverter.class)
-    @Column(name = "usa_activo", length = 100)
+
     @Convert(converter = VarcharBooleanConverter.class)
+    @Column(name = "usa_activo", length = 100)
+    @Convert(converter = com.lp2.sisinventario.sistemainventario.model.VarcharBooleanConverter.class)
     private Boolean enabled;
 
     // muchos usuarios -> un rol (columna "rol" FK a roles.rol_id)
