@@ -25,7 +25,7 @@ public class AsignacionRadio {
     @Column(name = "asr_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dec_id", nullable = false)
     private DetalleContrato detalleContrato;
 

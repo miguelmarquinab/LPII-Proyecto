@@ -2,7 +2,103 @@
 [ESTRUCTURA DE DIRECTORIOS] 
 Listado de rutas de carpetas para el volumen Nuevo vol
 El n�mero de serie del volumen es 92E3-A1A5
-
+D:.
+|   SistemainventarioApplication.java
+|   
++---api
+|   +---controller
+|   |       AsignacionApiController.java
+|   |       AuthApiController.java
+|   |       ContratoApiController.java
+|   |       RadioApiController.java
+|   |       
+|   +---dto
+|   |       ApiResponse.java
+|   |       AuthRequest.java
+|   |       AuthResponse.java
+|   |       CatalogoItemResponse.java
+|   |       RadioRequest.java
+|   |       RadioResponse.java
+|   |       
+|   +---exception
+|   |       GlobalApiExceptionHandler.java
+|   |       
+|   +---model
+|   |       RolApi.java
+|   |       UsuarioApi.java
+|   |       
+|   +---repository
+|   |   |   RadioApiRepository.java
+|   |   |   UsuarioApiRepository.java
+|   |   |   
+|   |   \---impl
+|   |           RadioApiRepositoryImpl.java
+|   |           
+|   +---security
+|   |       JwtAccessDeniedHandler.java
+|   |       JwtAuthenticationEntryPoint.java
+|   |       JwtAuthenticationFilter.java
+|   |       JwtService.java
+|   |       
+|   \---service
+|       |   AuthApiService.java
+|       |   RadioApiService.java
+|       |   
+|       \---impl
+|               AuthApiServiceImpl.java
+|               RadioApiServiceImpl.java
+|               
++---config
+|       SecurityConfig.java
+|       
++---controller
+|       AuthController.java
+|       ClienteController.java
+|       ContratoController.java
+|       DashboardController.java
+|       LoginController.java
+|       ModeloController.java
+|       PingController.java
+|       RadioController.java
+|       UserController.java
+|       
++---dto
+|       AsignacionResumenDTO.java
+|       ContratoFiltroDTO.java
+|       ContratoResumenDTO.java
+|       ModeloRequest.java
+|       ModeloResponse.java
+|       
++---model
+|       AsignacionRadio.java
+|       Cliente.java
+|       Contrato.java
+|       DetalleContrato.java
+|       Modelo.java
+|       Rol.java
+|       Usuario.java
+|       VarcharBooleanConverter.java
+|       
++---repository
+|       AsignacionRadioRepository.java
+|       ClienteRepository.java
+|       ContratoRepository.java
+|       ModeloRepository.java
+|       RolRepository.java
+|       UsuarioRepository.java
+|       
+\---service
+    |   ClienteService.java
+    |   ContratoService.java
+    |   JpaUserDetailsService.java
+    |   ModeloService.java
+    |   PingService.java
+    |   UsuarioService.java
+    |   
+    \---impl
+            ModeloServiceImpl.java
+            
+================================================== 
 [FILE: SistemainventarioApplication.java] 
 package com.lp2.sisinventario.sistemainventario;
 
@@ -19,6 +115,85 @@ public class SistemainventarioApplication {
 }
  
 [END: SistemainventarioApplication.java] 
+.................................................. 
+[FILE: api\controller\AsignacionApiController.java] 
+package com.lp2.sisinventario.sistemainventario.api.controller;
+
+import com.lp2.sisinventario.sistemainventario.model.AsignacionRadio;
+import com.lp2.sisinventario.sistemainventario.dto.AsignacionResumenDTO;
+import com.lp2.sisinventario.sistemainventario.repository.AsignacionRadioRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+@RestController
+@RequestMapping("/api/asignaciones")
+@CrossOrigin(origins = "http://localhost:4200")
+public class AsignacionApiController {
+
+    private final AsignacionRadioRepository asignacionRepository;
+
+    public AsignacionApiController(AsignacionRadioRepository asignacionRepository) {
+        this.asignacionRepository = asignacionRepository;
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @GetMapping
+    public ResponseEntity<List<AsignacionResumenDTO>> listarAsignaciones() {
+        List<AsignacionResumenDTO> lista = asignacionRepository.listarAsignacionesResumen();
+        
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerAsignacion(@PathVariable Integer id) {
+        AsignacionRadio a = asignacionRepository.findById(id).orElse(null);
+        if (a == null) return ResponseEntity.notFound().build();
+        
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id", a.getId());
+        resp.put("radioId", a.getRadioId());
+        resp.put("fechaAsignacion", a.getFechaAsignacion());
+        
+        Map<String, Object> det = new HashMap<>();
+        det.put("id", a.getDetalleContrato().getId());
+        resp.put("detalleContrato", det);
+        
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> crearAsignacion(@RequestBody AsignacionRadio asignacion) {
+        asignacion.setEliminado(false);
+        if (asignacion.getEstado() == null) {
+            asignacion.setEstado("ASIGNADO");
+        }
+        asignacionRepository.save(asignacion);
+        return ResponseEntity.ok(Map.of("mensaje", "Guardado correctamente"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarAsignacion(@PathVariable Integer id, @RequestBody AsignacionRadio asignacion) {
+        if (!asignacionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        asignacion.setId(id);
+        asignacionRepository.save(asignacion);
+        return ResponseEntity.ok(Map.of("mensaje", "Actualizado correctamente"));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarAsignacion(@PathVariable Integer id) {
+        return asignacionRepository.findById(id).map(asignacion -> {
+            asignacion.setEliminado(true);
+            asignacionRepository.save(asignacion);
+            return ResponseEntity.noContent().<Void>build(); 
+        }).orElse(ResponseEntity.notFound().build());
+    }
+} 
+[END: api\controller\AsignacionApiController.java] 
 .................................................. 
 [FILE: api\controller\AuthApiController.java] 
 package com.lp2.sisinventario.sistemainventario.api.controller;
@@ -59,15 +234,17 @@ package com.lp2.sisinventario.sistemainventario.api.controller;
 import com.lp2.sisinventario.sistemainventario.model.Contrato;
 import com.lp2.sisinventario.sistemainventario.dto.ContratoResumenDTO;
 import com.lp2.sisinventario.sistemainventario.repository.ContratoRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional; 
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/contratos")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ContratoApiController {
 
     private final ContratoRepository contratoRepository;
@@ -75,53 +252,60 @@ public class ContratoApiController {
     public ContratoApiController(ContratoRepository contratoRepository) {
         this.contratoRepository = contratoRepository;
     }
-    
+
     @GetMapping
     public ResponseEntity<List<ContratoResumenDTO>> listarContratos() {
         List<ContratoResumenDTO> lista = contratoRepository.buscarTodosParaResumen();
-        
         if (lista.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-
         return ResponseEntity.ok(lista);
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/{id}")
-    public ResponseEntity<Contrato> obtenerContrato(@PathVariable Integer id) {
-        return contratoRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> obtenerContrato(@PathVariable Integer id) {
+        Contrato c = contratoRepository.findById(id).orElse(null);
+        if (c == null) return ResponseEntity.notFound().build();
+        
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("id", c.getId());
+        resp.put("numero", c.getNumero());
+        resp.put("fechaInicio", c.getFechaInicio());
+        resp.put("fechaFin", c.getFechaFin());
+        resp.put("tipoContrato", c.getTipoContrato());
+        resp.put("valorMensual", c.getValorMensual());
+        resp.put("observaciones", c.getObservaciones());
+        resp.put("estado", c.getEstado());
+        
+        Map<String, Object> clienteMap = new HashMap<>();
+        if (c.getCliente() != null) {
+            clienteMap.put("id", c.getCliente().getId());
+        }
+        resp.put("cliente", clienteMap);
+        
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping
-    public ResponseEntity<Contrato> crearContrato(@RequestBody Contrato contrato) {
-        Contrato nuevoContrato = contratoRepository.save(contrato);
-        
-        java.net.URI location = org.springframework.web.servlet.support.ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(nuevoContrato.getId())
-                .toUri();
-
-        return ResponseEntity.created(location).body(nuevoContrato);
+    public ResponseEntity<?> crearContrato(@RequestBody Contrato contrato) {
+        contrato.setEliminado(false);
+        if (contrato.getEstado() == null) contrato.setEstado("ACTIVO");
+        contratoRepository.save(contrato);
+        return ResponseEntity.ok(Map.of("mensaje", "Guardado correctamente"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Contrato> actualizarContrato(@PathVariable Integer id, @RequestBody Contrato contrato) {
-        if (!contratoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> actualizarContrato(@PathVariable Integer id, @RequestBody Contrato contrato) {
+        if (!contratoRepository.existsById(id)) return ResponseEntity.notFound().build();
         contrato.setId(id);
-        Contrato contratoActualizado = contratoRepository.save(contrato);
-        return ResponseEntity.ok(contratoActualizado);
+        contratoRepository.save(contrato);
+        return ResponseEntity.ok(Map.of("mensaje", "Actualizado correctamente"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarContrato(@PathVariable Integer id) {
-        if (!contratoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+        if (!contratoRepository.existsById(id)) return ResponseEntity.notFound().build();
         contratoRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -1217,71 +1401,6 @@ public class RadioApiServiceImpl implements RadioApiService {
 [END: api\service\impl\RadioApiServiceImpl.java] 
 .................................................. 
 [FILE: config\SecurityConfig.java] 
-//package com.lp2.sisinventario.sistemainventario.config;
-//
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.authentication.AuthenticationProvider;
-//import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.web.SecurityFilterChain;
-//
-//@Configuration
-//public class SecurityConfig {
-//
-//    @Bean
-//    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(
-//                                "/login",
-//                                "/api/auth/**",
-//                                "/api/radios/**", // (si quieres pruebas rápidas)
-//
-//                                "/v3/api-docs/**",
-//                                "/swagger-ui/**",
-//                                "/swagger-ui.html",
-//                                "/swagger-ui/index.html",
-//                                "/swagger-resources/**",
-//                                "/webjars/**",
-//
-//                                "/css/**",
-//                                "/js/**",
-//                                "/images/**",
-//                                "/actuator/**"
-//                        ).permitAll()
-//                        .requestMatchers("/", "/dashboard", "/modelos/**").authenticated()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(login -> login
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/dashboard", true)
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
-////                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"))
-////                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
-//                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**", "/api/**"));
-//        return http.build();
-//    }
-//
-//    @Bean
-//    PasswordEncoder passwordEncoder() {
-//        // SOLO PARA DESARROLLO: no en producción
-//        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
-//    }
-//
-//    @Bean
-//    public AuthenticationProvider authenticationProvider(
-//            UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-//        var provider = new DaoAuthenticationProvider();
-//        provider.setUserDetailsService(userDetailsService);
-//        provider.setPasswordEncoder(passwordEncoder);
-//        return provider;
-//    }
-//}
 package com.lp2.sisinventario.sistemainventario.config;
 
 import org.springframework.context.annotation.Bean;
@@ -1289,11 +1408,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import com.lp2.sisinventario.sistemainventario.api.security.JwtAuthenticationFilter;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.Customizer;
+import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
@@ -1301,19 +1425,17 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/login",
                                 "/api/auth/**",
-                                "/api/radios/**",
-
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/index.html",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
@@ -1327,18 +1449,30 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"))
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**", "/api/**"));
+         
         http.addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
+    }
+    
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-
     }
 
     @Bean
@@ -1664,6 +1798,25 @@ public class UserController {
  
 [END: controller\UserController.java] 
 .................................................. 
+[FILE: dto\AsignacionResumenDTO.java] 
+package com.lp2.sisinventario.sistemainventario.dto;
+
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class AsignacionResumenDTO {
+    private Integer id;
+    private String numeroContrato;
+    private Integer radioId;
+    private LocalDate fechaAsignacion;
+    private LocalDate fechaDevolucion;
+    private String estado;
+} 
+[END: dto\AsignacionResumenDTO.java] 
+.................................................. 
 [FILE: dto\ContratoFiltroDTO.java] 
 package com.lp2.sisinventario.sistemainventario.dto;
 
@@ -1861,6 +2014,61 @@ public class ModeloResponse {
  
 [END: dto\ModeloResponse.java] 
 .................................................. 
+[FILE: model\AsignacionRadio.java] 
+package com.lp2.sisinventario.sistemainventario.model;
+
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@Entity
+@Table(name = "asignacionradios")
+public class AsignacionRadio {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "asr_id")
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dec_id", nullable = false)
+    private DetalleContrato detalleContrato;
+
+    @Column(name = "rad_id", nullable = false)
+    private Integer radioId;
+
+    @Column(name = "asr_fechaAsignacion", nullable = false)
+    private LocalDate fechaAsignacion;
+
+    @Column(name = "asr_fechaDevolucion")
+    private LocalDate fechaDevolucion;
+
+    @Column(name = "asr_estado", length = 50)
+    private String estado; 
+
+    @Column(name = "asr_observacionesAsignacion", columnDefinition = "TEXT")
+    private String observacionesAsignacion;
+
+    @Column(name = "asr_filaEliminada")
+    private boolean eliminado;
+
+    @Column(name = "usa_id")
+    private int usuarioId = 1;
+} 
+[END: model\AsignacionRadio.java] 
+.................................................. 
 [FILE: model\Cliente.java] 
 package com.lp2.sisinventario.sistemainventario.model;
 
@@ -1987,7 +2195,7 @@ public class Cliente {
 		return activo;
 	}
 
-	public void setUsuarioId(boolean activo) {
+	public void setActivo(boolean activo) {
 		this.activo = activo;
 	}
 	
@@ -2383,6 +2591,27 @@ public class VarcharBooleanConverter implements AttributeConverter<Boolean, Stri
 }
  
 [END: model\VarcharBooleanConverter.java] 
+.................................................. 
+[FILE: repository\AsignacionRadioRepository.java] 
+package com.lp2.sisinventario.sistemainventario.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+import com.lp2.sisinventario.sistemainventario.dto.AsignacionResumenDTO;
+import com.lp2.sisinventario.sistemainventario.model.AsignacionRadio;
+
+@Repository
+public interface AsignacionRadioRepository extends JpaRepository<AsignacionRadio, Integer> {
+
+    @Query("SELECT new com.lp2.sisinventario.sistemainventario.dto.AsignacionResumenDTO(" +
+           "a.id, a.detalleContrato.contrato.numero, a.radioId, a.fechaAsignacion, a.fechaDevolucion, a.estado) " +
+           "FROM AsignacionRadio a WHERE a.eliminado = false")
+    List<AsignacionResumenDTO> listarAsignacionesResumen();
+} 
+[END: repository\AsignacionRadioRepository.java] 
 .................................................. 
 [FILE: repository\ClienteRepository.java] 
 package com.lp2.sisinventario.sistemainventario.repository;
